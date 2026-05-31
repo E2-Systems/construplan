@@ -1,1 +1,7 @@
-Dashboard
+<form th:action="@{/logout}" method="post" class="ml-4">
+                       <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                       <button type="submit"
+                               class="px-4 py-2 rounded-md text-sm font-medium bg-red-600 text-white hover:bg-red-700 transition">
+                           Cerrar Sesión
+                       </button>
+                   </form>

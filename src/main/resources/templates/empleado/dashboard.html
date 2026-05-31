@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Empleado - ConstruPlan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#004E89',
+                        secondary: '#FF6B35',
+                        accent: '#FFD23F',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50">
+
+    <!-- Navbar -->
+    <nav class="bg-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 flex items-center">
+                        <svg width="40" height="40" viewBox="0 0 50 50" class="mr-3">
+                            <rect x="5" y="15" width="15" height="30" fill="#FF6B35" rx="2"/>
+                            <rect x="25" y="10" width="15" height="35" fill="#004E89" rx="2"/>
+                            <path d="M10 10 L25 5 L40 10" stroke="#FFD23F" stroke-width="3" stroke-linecap="round"/>
+                        </svg>
+                        <span class="text-2xl font-bold text-primary">ConstruPlan</span>
+                    </div>
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a th:href="@{/empleado/dashboard}"
+                           class="px-3 py-2 rounded-md text-sm font-medium bg-primary text-white">
+                            Dashboard
+                        </a>
+                        <a th:href="@{/empleado/registro-horas}"
+                           class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100">
+                            Registro de Horas
+                        </a>
+                        <a th:href="@{/empleado/planillas}"
+                           class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100">
+                            Mis Planillas
+                        </a>
+                        <a th:href="@{/empleado/tickets}"
+                           class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100">
+                            Tickets
+                        </a>
+                    </div>
+                </div>
+                <div class="flex items-center">
+                    <div class="flex items-center mr-4">
+                        <!-- Inicial del username -->
+                        <div class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold"
+                             th:text="${#strings.toUpperCase(#strings.substring(empleado.usuario.username, 0, 1))}">
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm font-medium text-gray-700"
+                               th:text="${empleado.usuario.username}"></p>
+                            <p class="text-xs text-gray-500"
+                               th:text="${empleado.usuario.rol.descripcion}"></p>
+                        </div>
+                    </div>
+                    <form th:action="@{/logout}" method="post" class="ml-4">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                        <button type="submit"
+                                class="px-4 py-2 rounded-md text-sm font-medium bg-red-600 text-white hover:bg-red-700 transition">
+                            Cerrar Sesión
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+
+        <!-- Header -->
+        <div class="px-4 py-6 sm:px-0">
+            <h1 class="text-3xl font-bold text-gray-900"
+                th:text="'¡Bienvenido, ' + ${empleado.usuario.username} + '!'"></h1>
+            <p class="mt-2 text-sm text-gray-600">
+                Hoy es <span th:text="${fechaActual}"></span> -
+                <span id="reloj-header"></span>
+            </p>
+        </div>
+
+        <!-- Registro Rápido de Asistencia -->
+        <div class="px-4 mb-8">
+            <div class="bg-gradient-to-r from-primary to-blue-800 rounded-lg shadow-xl p-6 text-white">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <h2 class="text-2xl font-bold mb-4">Registro de Asistencia</h2>
+                        <p class="text-blue-100 mb-6">Registra tu entrada o salida del trabajo</p>
+                        <div class="text-5xl font-bold mb-2" id="reloj">--:--</div>
+                        <p class="text-blue-100">Hora actual</p>
+
+                        <!-- Estado -->
+                        <div class="mt-4 px-4 py-2 bg-blue-900 bg-opacity-50 rounded-lg">
+                            <p class="text-sm font-semibold">Estado actual:</p>
+                            <p class="text-lg">
+                                <span th:if="${estadoAsistencia == 'SIN_ENTRADA'}">⏸️ Sin registrar</span>
+                                <span th:if="${estadoAsistencia == 'EN_TURNO'}">✅ En turno</span>
+                                <span th:if="${estadoAsistencia == 'JORNADA_COMPLETA'}">✔️ Jornada completa</span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col justify-center space-y-4">
+                        <!-- Botón Entrada -->
+                        <button onclick="registrarEntrada()"
+                                th:disabled="${estadoAsistencia != 'SIN_ENTRADA'}"
+                                th:classappend="${estadoAsistencia != 'SIN_ENTRADA'} ? 'opacity-50 cursor-not-allowed' : ''"
+                                class="btn-registro w-full bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-6 rounded-lg transition duration-200 flex items-center justify-center">
+                            <svg class="h-6 w-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
+                            </svg>
+                            Registrar Entrada
+                        </button>
+
+                        <!-- Botón Completar Tarea — solo si puedeCompletarTarea -->
+                        <button th:if="${puedeCompletarTarea}"
+                                onclick="completarTarea()"
+                                class="btn-registro w-full bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-4 px-6 rounded-lg transition duration-200 flex items-center justify-center">
+                            <svg class="h-6 w-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            Tarea Completada
+                        </button>
+
+                        <!-- Botón Salida -->
+                        <button onclick="registrarSalida()"
+                                th:disabled="${estadoAsistencia != 'EN_TURNO'}"
+                                th:classappend="${estadoAsistencia != 'EN_TURNO'} ? 'opacity-50 cursor-not-allowed' : ''"
+                                class="btn-registro w-full bg-red-500 hover:bg-red-600 text-white font-bold py-4 px-6 rounded-lg transition duration-200 flex items-center justify-center">
+                            <svg class="h-6 w-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                            </svg>
+                            Registrar Salida
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="px-4 mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+                <!-- Horas Semanales -->
+                <div class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-600">Horas esta Semana</p>

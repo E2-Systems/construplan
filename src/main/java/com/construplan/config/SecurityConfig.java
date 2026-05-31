@@ -66,14 +66,13 @@ public class SecurityConfig {
 	@Bean
 	public AuthenticationFailureHandler failureHandler() {
 		return (request, response, exception) -> {
-			String mensaje;
-
-			// Distingue el tipo de error para mostrar mensaje específico
-			if (exception.getMessage().contains("inactivo")) {
-				mensaje = "cuenta_inactiva";
-			} else {
-				mensaje = "credenciales_invalidas";
-			}
+			 String mensaje;
+		        if (exception.getMessage().contains("inactivo") ||
+		            exception.getMessage().contains("empleado")) {
+		            mensaje = "cuenta_inactiva";
+		        } else {
+		            mensaje = "credenciales_invalidas";
+		        }
 
 			response.sendRedirect(request.getContextPath() + "/login?error=" + mensaje);
 		};

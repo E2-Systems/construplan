@@ -58,7 +58,19 @@ public class Empleado {
     private String cuentaBancaria;
 	
 	private boolean activo;
+	
+	// @Column(name = "fecha_registro", updatable = false)
+	 //   private LocalDateTime fechaRegistro;
 
+	 // Calculado — no es columna
+    public boolean isTieneAccesoSistema() {
+        return this.usuario != null;
+    }
+
+    // Nombre completo — útil en vistas
+    public String getNombreCompleto() {
+        return nombres + " " + apellidos;
+    }
     
 	
 }

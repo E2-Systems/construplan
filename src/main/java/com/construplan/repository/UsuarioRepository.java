@@ -32,7 +32,7 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Integer> {
 	    
 	    boolean existsByUsername(String username);
 	    
-	 
+	    Optional<Usuario> findByEmpleado_IdEmpleado(Integer idEmpleado);
 	    
 	    
 	   
