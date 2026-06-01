@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Campo - ConstruPlan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: { extend: { colors: { primary: '#004E89', secondary: '#FF6B35', accent: '#FFD23F' } } }
+        }
+    </script>
+</head>
+<body class="bg-gray-50">
+
+   <div th:replace="~{fragments/navbar :: navbar('dashboard')}"></div>
+
+    <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+
+        <!-- Título -->
+        <div class="px-4 py-6 sm:px-0">
+            <h1 class="text-3xl font-bold text-gray-900">Dashboard - Ingeniero de Campo</h1>
+            <p class="mt-2 text-sm text-gray-600" th:text="${fechaActual}"></p>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="px-4 mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+
+                <!-- Registros Pendientes -->
+                <div class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-600">Registros Pendientes</p>
+                            <p class="text-3xl font-bold text-orange-600 mt-2" th:text="${registrosPendientes}"></p>
+                        </div>
+                        <div class="bg-orange-100 rounded-full p-3">
+                            <svg class="h-8 w-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-4">
+                        <a th:href="@{/campo/validacion-registros}" class="text-orange-600 hover:underline">
+                            Validar ahora →
+                        </a>
+                    </p>
+                </div>
+
+                <!-- Tickets Abiertos -->
+                <div class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-600">Tickets Abiertos</p>
+                            <p class="text-3xl font-bold text-red-600 mt-2" th:text="${ticketsAbiertos}"></p>
+                        </div>
+                        <div class="bg-red-100 rounded-full p-3">
+                            <svg class="h-8 w-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-4">Por resolver</p>
+                </div>
+
+                <!-- Empleados Activos -->
+                <div class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-600">Empleados Activos</p>
+                            <p class="text-3xl font-bold text-green-600 mt-2" th:text="${empleadosActivos}"></p>
+                        </div>
+                        <div class="bg-green-100 rounded-full p-3">
+                            <svg class="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-4">Trabajando hoy</p>
+                </div>
+
+                <!-- Tareas Semanales -->
+                <div class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-600">Tareas Esta Semana</p>
+                            <p class="text-3xl font-bold text-blue-600 mt-2" th:text="${tareasSemanales}"></p>
+                        </div>
+                        <div class="bg-blue-100 rounded-full p-3">
+                            <svg class="h-8 w-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-4">Asignadas</p>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Acciones Rápidas -->
+        <div class="px-4 mb-8">
+            <h2 class="text-xl font-bold text-gray-900 mb-4">Acciones Rápidas</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+                <a th:href="@{/campo/asignacion-tareas}"
+                   class="flex items-center p-4 bg-white rounded-lg shadow hover:shadow-lg transition border-l-4 border-blue-500">
+                    <div class="bg-blue-100 rounded-full p-3 mr-4">
+                        <svg class="h-8 w-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-900">Asignar Tareas</h3>
+                        <p class="text-sm text-gray-600">Asignar trabajo a empleados</p>
+                    </div>
+                </a>
+
+                <a th:href="@{/campo/validacion-registros}"
+                   class="flex items-center p-4 bg-white rounded-lg shadow hover:shadow-lg transition border-l-4 border-orange-500">
+                    <div class="bg-orange-100 rounded-full p-3 mr-4">
+                        <svg class="h-8 w-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-900">Validar Registros</h3>
+                        <p class="text-sm text-gray-600">Aprobar horas trabajadas</p>
+                    </div>
+                </a>
+
+                <a th:href="@{/campo/tickets}"
+                   class="flex items-center p-4 bg-white rounded-lg shadow hover:shadow-lg transition border-l-4 border-red-500">
+                    <div class="bg-red-100 rounded-full p-3 mr-4">
+                        <svg class="h-8 w-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-900">Gestionar Tickets</h3>
+                        <p class="text-sm text-gray-600">Resolver inconformidades</p>
+                    </div>
+                </a>
+
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div th:replace="~{fragments/footer :: footer}"></div>
+
+</body>
+</html>
