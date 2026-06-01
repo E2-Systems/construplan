@@ -30,7 +30,8 @@ public class UsuarioDetailsService implements UserDetailsService {
 
 	        if (!usuario.isActivo())
 	            throw new DisabledException("El usuario está inactivo");
-
+	        
+	      
 	        // Si es EMPLEADO debe tener un empleado asociado
 	        if (usuario.getRol() == Rol.EMPLEADO) {
 	            boolean tieneEmpleado = empleadoRepository.findByUsuario_Id(usuario.getId()).isPresent();

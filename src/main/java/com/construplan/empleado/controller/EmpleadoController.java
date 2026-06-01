@@ -1,4 +1,4 @@
-package com.construplan.controller;
+package com.construplan.empleado.controller;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -12,7 +12,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import com.construplan.model.entity.Empleado;
+import com.construplan.empleado.model.entity.Empleado;
 import com.construplan.service.EmpleadoService;
 
 @Controller

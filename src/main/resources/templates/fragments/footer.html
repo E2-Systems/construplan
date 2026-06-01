@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+                xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+
+<footer th:fragment="footer" class="bg-white mt-12 border-t">
+    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8
+                flex flex-col sm:flex-row justify-between items-center gap-2">
+
+        <p class="text-sm text-gray-500">
+            &copy; <span th:text="${#dates.year(#dates.createNow())}"></span>
+            ConstruPlan. Todos los derechos reservados.
+        </p>
+
+        <!-- Mensaje según rol — usa sec:authorize igual que el navbar -->
+        <p class="text-xs text-gray-400">
+            <span sec:authorize="hasAuthority('ROLE_EMPLEADO')">Registro y consulta de jornada laboral</span>
+            <span sec:authorize="hasAuthority('ROLE_CAMPO')">Gestión de tareas y validación de producción</span>
+            <span sec:authorize="hasAuthority('ROLE_OFICINA')">Gestión de planillas y pagos</span>
+            <span sec:authorize="hasAuthority('ROLE_ADMIN')">Administración del sistema</span>
+        </p>
+
+        <p class="text-xs text-gray-400">
+            Usuario: <strong th:text="${#authentication.name}"></strong>
+            | Rol: <strong sec:authorize="hasAuthority('ROLE_EMPLEADO')">Empleado</strong>
+                  <strong sec:authorize="hasAuthority('ROLE_CAMPO')">Ingeniero de Campo</strong>
+                  <strong sec:authorize="hasAuthority('ROLE_OFICINA')">Ingeniero de Oficina</strong>
+                  <strong sec:authorize="hasAuthority('ROLE_ADMIN')">Administrador</strong>
+        </p>
+
+    </div>
+</footer>
+
+</body>
+</html>

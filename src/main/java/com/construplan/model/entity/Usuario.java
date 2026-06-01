@@ -2,6 +2,8 @@ package com.construplan.model.entity;
 
 import java.time.LocalDateTime;
 
+import com.construplan.empleado.model.entity.Empleado;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

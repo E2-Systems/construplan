@@ -8,7 +8,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.construplan.model.entity.Empleado;
+import com.construplan.empleado.model.entity.Empleado;
 import com.construplan.model.entity.Rol;
 import com.construplan.model.entity.Usuario;
 import com.construplan.repository.EmpleadoRepository;

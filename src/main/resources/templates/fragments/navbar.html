@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+                xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+
+<nav th:fragment="navbar(active)" class="bg-white shadow-lg">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between h-16">
+
+            <!-- Logo -->
+            <div class="flex items-center">
+                <div class="flex-shrink-0 flex items-center">
+                    <svg width="40" height="40" viewBox="0 0 50 50" class="mr-3">
+                        <rect x="5" y="15" width="15" height="30" fill="#FF6B35" rx="2"/>
+                        <rect x="25" y="10" width="15" height="35" fill="#004E89" rx="2"/>
+                        <path d="M10 10 L25 5 L40 10" stroke="#FFD23F" stroke-width="3" stroke-linecap="round"/>
+                    </svg>
+                    <span class="text-2xl font-bold text-primary">ConstruPlan</span>
+                </div>
+
+                <!-- Menú dinámico por rol -->
+                <div class="ml-10 flex items-baseline space-x-4">
+
+                    <!-- ── EMPLEADO ── -->
+                    <th:block sec:authorize="hasAuthority('ROLE_EMPLEADO')">
+                        <a th:href="@{/empleado/dashboard}"
+                           th:classappend="${active == 'dashboard'} ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100'"
+                           class="px-3 py-2 rounded-md text-sm font-medium">Inicio</a>
+
+                        <a th:href="@{/empleado/jornada}"
+                           th:classappend="${active == 'jornada'} ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100'"
+                           class="px-3 py-2 rounded-md text-sm font-medium">Mi Jornada</a>
+
+                        <a th:href="@{/empleado/horas}"
+                           th:classappend="${active == 'horas'} ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100'"
+                           class="px-3 py-2 rounded-md text-sm font-medium">Mis Horas</a>
+
+                        <a th:href="@{/empleado/pago}"
+                           th:classappend="${active == 'pago'} ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100'"
+                           class="px-3 py-2 rounded-md text-sm font-medium">Mi Pago</a>
+
+                        <a th:href="@{/tickets}"
+                           th:classappend="${active == 'tickets'} ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100'"
+                           class="px-3 py-2 rounded-md text-sm font-medium">Tickets</a>
+                    </th:block>
+
+                    <!-- ── CAMPO ── -->
+                    <th:block sec:authorize="hasAuthority('ROLE_CAMPO')">
+                        <a th:href="@{/campo/dashboard}"
+                           th:classappend="${active == 'dashboard'} ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100'"
+                           class="px-3 py-2 rounded-md text-sm font-medium">Inicio</a>
+
+                        <a th:href="@{/campo/proyectos}"
+                           th:classappend="${active == 'proyectos'} ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100'"
+                           class="px-3 py-2 rounded-md text-sm font-medium">Proyectos</a>
+
+                        <a th:href="@{/campo/tareas}"
+                           th:classappend="${active == 'tareas'} ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100'"
+                           class="px-3 py-2 rounded-md text-sm font-medium">Tareas</a>
+
+                        <a th:href="@{/campo/metas}"
+                           th:classappend="${active == 'metas'} ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100'"
+                           class="px-3 py-2 rounded-md text-sm font-medium">Metas</a>
+
+                        <a th:href="@{/campo/asignaciones}"
+                           th:classappend="${active == 'asignaciones'} ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100'"
+                           class="px-3 py-2 rounded-md text-sm font-medium">Asignaciones</a>
+
+                        <a th:href="@{/campo/produccion}"
+                           th:classappend="${active == 'produccion'} ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100'"
+                           class="px-3 py-2 rounded-md text-sm font-medium">Producción</a>
+
+                        <a th:href="@{/tickets}"
+                           th:classappend="${active == 'tickets'} ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100'"
+                           class="px-3 py-2 rounded-md text-sm font-medium">Tickets</a>
+                    </th:block>
+
+                    <!-- ── OFICINA ── -->
+                    <th:block sec:authorize="hasAuthority('ROLE_OFICINA')">
+                        <a th:href="@{/oficina/dashboard}"
+                           th:classappend="${active == 'dashboard'} ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100'"
+                           class="px-3 py-2 rounded-md text-sm font-medium">Inicio</a>
+
+                        <a th:href="@{/oficina/empleados}"
+                           th:classappend="${active == 'empleados'} ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100'"
+                           class="px-3 py-2 rounded-md text-sm font-medium">Empleados</a>
+
+                        <a th:href="@{/oficina/sueldos}"
+                           th:classappend="${active == 'sueldos'} ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100'"
+                           class="px-3 py-2 rounded-md text-sm font-medium">Sueldos</a>
+
+                        <a th:href="@{/planillas}"
+                           th:classappend="${active == 'planillas'} ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100'"
+                           class="px-3 py-2 rounded-md text-sm font-medium">Planillas</a>
+
+                        <a th:href="@{/ajustes}"
+                           th:classappend="${active == 'ajustes'} ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100'"
+                           class="px-3 py-2 rounded-md text-sm font-medium">Ajustes</a>
+
+                        <a th:href="@{/reportes}"
+                           th:classappend="${active == 'reportes'} ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100'"
+                           class="px-3 py-2 rounded-md text-sm font-medium">Reportes</a>
+                    </th:block>
+
+                    <!-- ── ADMIN ── -->
+                    <th:block sec:authorize="hasAuthority('ROLE_ADMIN')">
+                        <a th:href="@{/admin/dashboard}"
+                           th:classappend="${active == 'dashboard'} ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100'"
+                           class="px-3 py-2 rounded-md text-sm font-medium">Dashboard</a>
+
+                        <a th:href="@{/admin/usuarios}"
+                           th:classappend="${active == 'usuarios'} ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100'"
+                           class="px-3 py-2 rounded-md text-sm font-medium">Usuarios</a>
+
+                        <a th:href="@{/admin/empleados}"
+                           th:classappend="${active == 'empleados'} ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100'"
+                           class="px-3 py-2 rounded-md text-sm font-medium">Empleados</a>
+
+                        <a th:href="@{/admin/configuracion}"
+                           th:classappend="${active == 'configuracion'} ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100'"
+                           class="px-3 py-2 rounded-md text-sm font-medium">Configuración</a>
+
+                        <a th:href="@{/admin/reportes}"
+                           th:classappend="${active == 'reportes'} ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100'"
+                           class="px-3 py-2 rounded-md text-sm font-medium">Reportes</a>
+
+                        <a th:href="@{/admin/auditoria}"
+                           th:classappend="${active == 'auditoria'} ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100'"
+                           class="px-3 py-2 rounded-md text-sm font-medium">Auditoría</a>
+                    </th:block>
+
+                </div>
+            </div>
+
+            <!-- Usuario + Logout -->
+            <div class="flex items-center">
+                <div class="flex items-center mr-4">
+                    <div class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold"
+                         sec:authentication="name"
+                         th:text="${#strings.toUpperCase(#strings.substring(#authentication.name, 0, 1))}">
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm font-medium text-gray-700"
+                           th:text="${#authentication.name}"></p>
+                        <p class="text-xs text-gray-500"
+                           sec:authentication="principal.authorities"></p>
+                    </div>
+                </div>
+
+                <form th:action="@{/logout}" method="post" class="ml-4">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                    <button type="submit"
+                            class="px-4 py-2 rounded-md text-sm font-medium bg-red-600 text-white hover:bg-red-700 transition">
+                        Cerrar Sesión
+                    </button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</nav>
+
+</body>
+</html>
