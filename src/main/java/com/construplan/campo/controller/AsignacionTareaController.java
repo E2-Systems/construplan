@@ -20,7 +20,7 @@ import com.construplan.campo.model.entity.AsignacionTarea;
 import com.construplan.campo.model.entity.Modalidad;
 import com.construplan.campo.service.AsignacionTareaService;
 import com.construplan.campo.service.MetaService;
-import com.construplan.service.EmpleadoService;
+import com.construplan.empleado.service.EmpleadoService;
 
 
 

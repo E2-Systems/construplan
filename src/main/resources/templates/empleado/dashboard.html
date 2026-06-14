@@ -115,9 +115,9 @@
 		                    </div>
 		                    <div class="mt-4">
 		                        <div class="w-full bg-gray-200 rounded-full h-2">
-		                            <div class="bg-primary h-2 rounded-full"
-		                                 th:style="'width: ' + ${#numbers.formatDecimal(T(Math).min(horasSemanales / 48 * 100, 100), 1, 1)} + '%'">
-		                            </div>
+		                            <div class="bg-primary h-2 rounded-full"		                                
+										 th:style="'width: ' + (${horasSemanales gt 48} ? 100 : ${horasSemanales / 48 * 100}) + '%'">
+									  </div>
 		                        </div>
 		                        <p class="text-xs text-gray-500 mt-1">Meta: 48 horas semanales</p>
 		                    </div>

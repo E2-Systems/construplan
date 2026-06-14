@@ -1,4 +1,4 @@
-package com.construplan.service;
+package com.construplan.empleado.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -11,8 +11,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.construplan.admin.model.entity.Usuario;
 import com.construplan.admin.repository.UsuarioRepository;
 import com.construplan.empleado.model.entity.Empleado;
+import com.construplan.empleado.repository.EmpleadoRepository;
 import com.construplan.model.entity.Rol;
-import com.construplan.repository.EmpleadoRepository;
 
 @Service
 public class EmpleadoService {
@@ -183,9 +183,7 @@ public class EmpleadoService {
     }
 
     public Empleado buscarPorUsername(String username) {
-        Usuario usuario = usuarioRepository.findByUsername(username)
-                .orElseThrow(() -> new IllegalStateException("Usuario no encontrado"));
-        return empleadoRepository.findByUsuario_Id(usuario.getId())
+    	return empleadoRepository.findByUsuario_Username(username)
                 .orElseThrow(() -> new IllegalStateException("Empleado no encontrado"));
     }
     

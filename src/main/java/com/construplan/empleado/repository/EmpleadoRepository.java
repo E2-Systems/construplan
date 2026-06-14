@@ -1,9 +1,11 @@
-package com.construplan.repository;
+package com.construplan.empleado.repository;
 
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.construplan.empleado.model.entity.Empleado;
@@ -13,7 +15,8 @@ public interface EmpleadoRepository extends JpaRepository<Empleado, Integer> {
     Optional<Empleado> findByDni(String dni);
  // buscarPorIdUsuario
     Optional<Empleado> findByUsuario_Id(Integer idUsuario);
-    Optional<Empleado> findByUsuario_Username(String username);
+    @Query("SELECT e FROM Empleado e JOIN FETCH e.usuario WHERE e.usuario.username = :username")
+    Optional<Empleado> findByUsuario_Username(@Param("username") String username);
     
  // buscarPorCategoria
     List<Empleado> findByCategoria(String categoria);

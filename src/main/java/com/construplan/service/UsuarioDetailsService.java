@@ -12,8 +12,8 @@ import org.springframework.stereotype.Service;
 
 import com.construplan.admin.model.entity.Usuario;
 import com.construplan.admin.repository.UsuarioRepository;
+import com.construplan.empleado.repository.EmpleadoRepository;
 import com.construplan.model.entity.Rol;
-import com.construplan.repository.EmpleadoRepository;
 
 @Service
 public class UsuarioDetailsService implements UserDetailsService {

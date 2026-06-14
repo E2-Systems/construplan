@@ -19,7 +19,7 @@ import com.construplan.campo.model.entity.Modalidad;
 import com.construplan.campo.repository.AsignacionTareaRepository;
 import com.construplan.campo.repository.MetaRepository;
 import com.construplan.empleado.model.entity.Empleado;
-import com.construplan.repository.EmpleadoRepository;
+import com.construplan.empleado.repository.EmpleadoRepository;
 
 @Service
 public class AsignacionTareaService {
