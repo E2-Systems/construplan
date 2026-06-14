@@ -1,4 +1,4 @@
-package com.construplan.repository;
+package com.construplan.admin.repository;
 
 import java.util.List;
 import java.util.Optional;
@@ -8,8 +8,8 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import com.construplan.admin.model.entity.Usuario;
 import com.construplan.model.entity.Rol;
-import com.construplan.model.entity.Usuario;
 
 import jakarta.transaction.Transactional;
 
@@ -34,7 +34,9 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Integer> {
 	    
 	    Optional<Usuario> findByEmpleado_IdEmpleado(Integer idEmpleado);
 	    
-	    
+	 // Contar usuarios por rol
+	    @Query("SELECT COUNT(u) FROM Usuario u WHERE u.rol = :rol")
+	    long countByRol(@Param("rol") Rol rol);
 	   
 	
 }

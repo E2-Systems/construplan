@@ -1,8 +1,9 @@
-package com.construplan.model.entity;
+package com.construplan.admin.model.entity;
 
 import java.time.LocalDateTime;
 
 import com.construplan.empleado.model.entity.Empleado;
+import com.construplan.model.entity.Rol;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

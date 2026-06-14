@@ -3,7 +3,7 @@ package com.construplan.empleado.model.entity;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-import com.construplan.model.entity.Usuario;
+import com.construplan.admin.model.entity.Usuario;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

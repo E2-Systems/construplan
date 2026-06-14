@@ -10,16 +10,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.construplan.admin.model.entity.Proyecto;
+import com.construplan.admin.model.entity.Usuario;
 import com.construplan.admin.repository.ProyectoRepository;
+import com.construplan.admin.repository.UsuarioRepository;
 import com.construplan.campo.model.entity.AsignacionTarea;
 import com.construplan.campo.model.entity.Meta;
 import com.construplan.campo.model.entity.Modalidad;
 import com.construplan.campo.repository.AsignacionTareaRepository;
 import com.construplan.campo.repository.MetaRepository;
 import com.construplan.empleado.model.entity.Empleado;
-import com.construplan.model.entity.Usuario;
 import com.construplan.repository.EmpleadoRepository;
-import com.construplan.repository.UsuarioRepository;
 
 @Service
 public class AsignacionTareaService {

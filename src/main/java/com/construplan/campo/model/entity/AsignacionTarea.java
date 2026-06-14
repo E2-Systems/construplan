@@ -5,8 +5,8 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 import com.construplan.admin.model.entity.Proyecto;
+import com.construplan.admin.model.entity.Usuario;
 import com.construplan.empleado.model.entity.Empleado;
-import com.construplan.model.entity.Usuario;
 
 import jakarta.persistence.*;
 import lombok.*;

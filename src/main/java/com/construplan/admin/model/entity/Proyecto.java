@@ -7,7 +7,6 @@ import com.construplan.campo.model.entity.AsignacionTarea;
 import com.construplan.campo.model.entity.Meta;
 import com.construplan.campo.model.entity.Modalidad;
 import com.construplan.empleado.model.entity.Empleado;
-import com.construplan.model.entity.Usuario;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

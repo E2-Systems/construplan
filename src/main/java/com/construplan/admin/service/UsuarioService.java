@@ -1,4 +1,4 @@
-package com.construplan.service;
+package com.construplan.admin.service;
 
 import java.util.List;
 
@@ -7,8 +7,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.construplan.model.entity.Usuario;
-import com.construplan.repository.UsuarioRepository;
+import com.construplan.admin.model.entity.Usuario;
+import com.construplan.admin.repository.UsuarioRepository;
 
 @Service
 public class UsuarioService {
