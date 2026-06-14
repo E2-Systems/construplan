@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Metas - ConstruPlan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: { extend: { colors: { primary: '#004E89', secondary: '#FF6B35', accent: '#FFD23F' } } }
+        }
+    </script>
+</head>
+<body class="bg-gray-50">
+
+    <div th:replace="~{fragments/navbar :: navbar('metas')}"></div>
+
+    <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+
+        <!-- Header -->
+        <div class="px-4 py-6 sm:px-0 flex justify-between items-center">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900">Gestión de Metas</h1>
+                <p class="mt-2 text-sm text-gray-600">Define las metas de producción para cada tarea</p>
+            </div>
+            <a th:href="@{/campo/metas/nueva}"
+               class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-blue-800 transition">
+                <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+                Nueva Meta
+            </a>
+        </div>
+
+        <!-- Mensajes flash -->
+        <div class="px-4 mb-4">
+            <div th:if="${mensaje}" class="bg-green-50 border-l-4 border-green-400 p-4 rounded flex items-start">
+                <svg class="h-5 w-5 text-green-400 mr-3 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                </svg>
+                <p class="text-sm text-green-700" th:text="${mensaje}"></p>
+            </div>
+            <div th:if="${error}" class="bg-red-50 border-l-4 border-red-400 p-4 rounded flex items-start">
+                <svg class="h-5 w-5 text-red-400 mr-3 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                </svg>
+                <p class="text-sm text-red-700" th:text="${error}"></p>
+            </div>
+        </div>
+
+        <!-- Filtros -->
+        <div class="px-4 mb-6">
+            <div class="bg-white p-4 rounded-lg shadow">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Buscar por Tarea</label>
+                        <input type="text" id="searchInput" placeholder="Buscar tarea..."
+                               class="w-full px-4 py-2 border border-gray-300 rounded-md">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Filtrar por Tipo</label>
+                        <select id="filterTipo" class="w-full px-4 py-2 border border-gray-300 rounded-md">
+                            <option value="">Todos los tipos</option>
+                            <option value="true">Metas Principales</option>
+                            <option value="false">Metas Secundarias</option>
+                        </select>
+                    </div>
+                    <div class="flex items-end">
+                        <button onclick="resetFilters()"
+                                class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition">
+                            Limpiar filtros
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabla -->
+        <div class="px-4">
+            <div class="bg-white shadow rounded-lg overflow-hidden">
+                <div th:if="${not #lists.isEmpty(metas)}" class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tarea</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Meta de Producción</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Equivalencia en Horas</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tipo</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Eficiencia</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200" id="metasTable">
+                            <tr th:each="meta : ${metas}"
+                                class="hover:bg-gray-50 meta-row"
+                                th:attr="data-tarea=${#strings.toLowerCase(meta.tarea.nombre)},
+                                         data-tipo=${meta.libre}">
+
+                                <td class="px-6 py-4 text-sm text-gray-900"
+                                    th:text="'#' + ${meta.idMeta}"></td>
+
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center">
+                                        <div class="h-10 w-10 rounded-full bg-accent text-gray-800 flex items-center justify-center font-bold flex-shrink-0"
+                                             th:text="${#strings.toUpperCase(#strings.substring(meta.tarea.nombre, 0, 1))}"></div>
+                                        <div class="ml-4">
+                                            <div class="text-sm font-medium text-gray-900" th:text="${meta.tarea.nombre}"></div>
+                                            <div class="text-xs text-gray-500" th:text="${meta.tarea.unidadMedida}"></div>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-lg font-bold text-gray-900">
+                                        <span th:text="${#numbers.formatDecimal(meta.cantidad, 1, 2)}"></span>
+                                        <span th:text="${meta.tarea.unidadMedida}"></span>
+                                    </div>
+                                </td>
+
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-lg font-bold text-secondary">
+                                        <span th:text="${#numbers.formatDecimal(meta.horasEquivalentes, 1, 2)}"></span> horas
+                                    </div>
+                                    <div class="text-xs text-gray-500">
+                                        <span th:text="${#numbers.formatDecimal(meta.horasEquivalentes / meta.cantidad, 1, 2)}"></span>
+                                        horas/<span th:text="${meta.tarea.unidadMedida}"></span>
+                                    </div>
+                                </td>
+
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span th:if="${meta.libre}"
+                                          class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                        Principal
+                                    </span>
+                                    <span th:unless="${meta.libre}"
+                                          class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                                        Secundaria
+                                    </span>
+                                </td>
+
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <span th:with="ef=${meta.horasEquivalentes / meta.cantidad * 100}"
+                                              th:classappend="${ef <= 100} ? 'text-green-600' : 'text-red-600'"
+                                              th:text="${(ef <= 100) ? '↑' : '↓'} + ' ' + ${#numbers.formatDecimal(ef, 1, 1)} + '%'"
+                                              class="text-sm font-medium mr-2"></span>
+                                        <div class="w-24 bg-gray-200 rounded-full h-2">
+                                            <div class="bg-primary h-2 rounded-full"
+                                                 th:with="ef=${meta.horasEquivalentes / meta.cantidad * 100}"
+                                                 th:style="'width: ' + ${#numbers.formatDecimal(T(Math).min(100, ef), 1, 1)} + '%'"></div>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <a th:href="@{/campo/metas/{id}/editar(id=${meta.idMeta})}"
+                                       class="text-primary hover:text-blue-900 mr-4" title="Editar">
+                                        <svg class="inline h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                        </svg>
+                                    </a>
+                                    <form th:action="@{/campo/metas/{id}/eliminar(id=${meta.idMeta})}"
+                                          method="post" class="inline"
+                                          onsubmit="return confirm('¿Está seguro de eliminar esta meta?\n\nNota: No se puede eliminar la única meta principal de una tarea.')">
+                                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                                        <button type="submit" class="text-red-600 hover:text-red-900" title="Eliminar">
+                                            <svg class="inline h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                            </svg>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Sin metas -->
+                <div th:if="${#lists.isEmpty(metas)}" class="px-6 py-12 text-center">
+                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <h3 class="mt-2 text-sm font-medium text-gray-900">No hay metas definidas</h3>
+                    <p class="mt-1 text-sm text-gray-500">Comienza definiendo metas para las tareas.</p>
+                    <div class="mt-6">
+                        <a th:href="@{/campo/metas/nueva}"
+                           class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-blue-700">
+                            <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                            </svg>
+                            Nueva Meta
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Info -->
+            <div class="mt-6 bg-blue-50 border-l-4 border-blue-400 p-4 rounded">
+                <div class="flex">
+                    <svg class="h-5 w-5 text-blue-400 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                    </svg>
+                    <div class="ml-3">
+                        <h3 class="text-sm font-medium text-blue-800">Información sobre Metas</h3>
+                        <ul class="mt-2 text-sm text-blue-700 list-disc list-inside space-y-1">
+                            <li><strong>Meta Principal:</strong> Es la meta por defecto al asignar la tarea.</li>
+                            <li><strong>Meta Secundaria:</strong> Metas alternativas seleccionables manualmente.</li>
+                            <li><strong>Equivalencia:</strong> Horas esperadas para cumplir la meta.</li>
+                            <li><strong>Eficiencia:</strong> Relación horas/producción (menor es mejor).</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="~{fragments/footer :: footer}"></div>
+
+    <script>
+        document.getElementById('searchInput').addEventListener('keyup', filterTable);
+        document.getElementById('filterTipo').addEventListener('change', filterTable);
+
+        function filterTable() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const tipo   = document.getElementById('filterTipo').value;
+            document.querySelectorAll('.meta-row').forEach(row => {
+                const matchSearch = row.dataset.tarea.includes(search);
+                const matchTipo   = tipo === '' || row.dataset.tipo === tipo;
+                row.style.display = matchSearch && matchTipo ? '' : 'none';
+            });
+        }
+
+        function resetFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('filterTipo').value  = '';
+            filterTable();
+        }
+    </script>
+</body>
+</html>
