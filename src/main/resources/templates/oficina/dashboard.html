@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Oficina - ConstruPlan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        /* Paleta corporativa consistente con el resto del sistema */
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#004E89',
+                        secondary: '#FF6B35',
+                        accent: '#FFD23F',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-gray-50">
+
+    <!-- Navbar reutilizable — la verificación de sesión y rol la gestiona Spring Security en SecurityConfig -->
+    <div th:replace="~{fragments/navbar :: navbar('dashboard')}"></div>
+
+    <!-- Mensajes flash inyectados por RedirectAttributes en el controlador -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4" th:if="${mensaje}">
+        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
+            <span class="block sm:inline" th:text="${mensaje}"></span>
+        </div>
+    </div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4" th:if="${error}">
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+            <span class="block sm:inline" th:text="${error}"></span>
+        </div>
+    </div>
+
+    <!-- Contenido principal -->
+    <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+
+        <!-- Encabezado con fecha y semana actual -->
+        <div class="px-4 py-6 sm:px-0">
+            <h1 class="text-3xl font-bold text-gray-900">Dashboard Oficina Técnica</h1>
+            <p class="mt-2 text-sm text-gray-600">
+                <span th:text="${fechaActual}"></span> - <span th:text="${horaActual}"></span>
+            </p>
+            <p class="text-sm text-gray-600">
+                Semana actual: <span class="font-semibold" th:text="${semanaActual}"></span>
+            </p>
+        </div>
+
+        <!-- Tarjetas de estadísticas principales — cada una refleja un KPI clave para la oficina técnica -->
+        <div class="px-4 mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+
+                <!-- Planillas Generadas -->
+                <div class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-600">Planillas Generadas</p>
+                            <p class="text-3xl font-bold text-primary mt-2" th:text="${planillasGeneradas}"></p>
+                        </div>
+                        <div class="bg-blue-100 rounded-full p-3">
+                            <svg class="h-8 w-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-4">Esta semana</p>
+                </div>
+
+                <!-- Planillas Pendientes -->
+                <div class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-600">Pendientes de Pago</p>
+                            <p class="text-3xl font-bold text-orange-600 mt-2" th:text="${planillasPendientes}"></p>
+                        </div>
+                        <div class="bg-orange-100 rounded-full p-3">
+                            <svg class="h-8 w-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-4">
+                        <a th:href="@{/oficina/planillas(filtro='pendientes')}"
+                            class="text-orange-600 hover:underline">Ver detalles →</a>
+                    </p>
+                </div>
+
+                <!-- Empleados Activos -->
+                <div class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-600">Empleados Activos</p>
+                            <p class="text-3xl font-bold text-green-600 mt-2" th:text="${empleadosActivos}"></p>
+                        </div>
+                        <div class="bg-green-100 rounded-full p-3">
+                            <svg class="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-4">Personal en obra</p>
+                </div>
+
+                <!-- Total por Pagar — se formatea con #numbers para mostrar el separador de miles y decimales -->
+                <div class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-600">Total por Pagar</p>
+                            <p class="text-2xl font-bold text-purple-600 mt-2"
+                                th:text="'S/ ' + ${#numbers.formatDecimal(totalPorPagar, 1, 'COMMA', 2, 'POINT')}"></p>
+                        </div>
+                        <div class="bg-purple-100 rounded-full p-3">
+                            <svg class="h-8 w-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-4">Esta semana</p>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Alerta condicional — se muestra solo si existen ajustes o tickets pendientes de atención -->
+        <div class="px-4 mb-8" th:if="${ajustesPendientes > 0 or ticketsPendientes > 0}">
+            <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd"
+                                d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                                clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-sm font-medium text-yellow-800">Atención requerida</h3>
+                        <div class="mt-2 text-sm text-yellow-700">
+                            <p th:if="${ajustesPendientes > 0}">
+                                • Tienes <strong th:text="${ajustesPendientes}"></strong> ajuste(s) pendiente(s) de
+                                aplicar.
+                                <a th:href="@{/oficina/ajustes}" class="underline ml-2">Revisar →</a>
+                            </p>
+                            <p th:if="${ticketsPendientes > 0}">
+                                • Hay <strong th:text="${ticketsPendientes}"></strong> ticket(s) pendiente(s) de
+                                resolución.
+                                <a th:href="@{/oficina/tickets}" class="underline ml-2">Revisar →</a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Acciones Rápidas — tarjetas de navegación directa a cada módulo de la oficina técnica -->
+        <div class="px-4 mb-8">
+            <h2 class="text-xl font-bold text-gray-900 mb-4">Acciones Rápidas</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+
+                <a th:href="@{/oficina/planillas(action='generar')}"
+                    class="flex items-center p-4 bg-white rounded-lg shadow hover:shadow-lg transition border-l-4 border-blue-500">
+                    <div class="bg-blue-100 rounded-full p-3 mr-4">
+                        <svg class="h-8 w-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-900">Generar Planilla</h3>
+                        <p class="text-sm text-gray-600">Crear nueva planilla semanal</p>
+                    </div>
+                </a>
+
+                <a th:href="@{/oficina/planillas}"
+                    class="flex items-center p-4 bg-white rounded-lg shadow hover:shadow-lg transition border-l-4 border-green-500">
+                    <div class="bg-green-100 rounded-full p-3 mr-4">
+                        <svg class="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-900">Ver Planillas</h3>
+                        <p class="text-sm text-gray-600">Consultar planillas generadas</p>
+                    </div>
+                </a>
+
+                <a th:href="@{/oficina/ajustes}"
+                    class="flex items-center p-4 bg-white rounded-lg shadow hover:shadow-lg transition border-l-4 border-yellow-500">
+                    <div class="bg-yellow-100 rounded-full p-3 mr-4">
+                        <svg class="h-8 w-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-900">Gestionar Ajustes</h3>
+                        <p class="text-sm text-gray-600">Adelantos, bonos, descuentos</p>
+                    </div>
+                </a>
+
+                <a th:href="@{/oficina/empleados}"
+                    class="flex items-center p-4 bg-white rounded-lg shadow hover:shadow-lg transition border-l-4 border-purple-500">
+                    <div class="bg-purple-100 rounded-full p-3 mr-4">
+                        <svg class="h-8 w-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-900">Ver Empleados</h3>
+                        <p class="text-sm text-gray-600">Consultar personal activo</p>
+                    </div>
+                </a>
+
+                <a th:href="@{/oficina/reportes}"
+                    class="flex items-center p-4 bg-white rounded-lg shadow hover:shadow-lg transition border-l-4 border-red-500">
+                    <div class="bg-red-100 rounded-full p-3 mr-4">
+                        <svg class="h-8 w-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-900">Generar Reportes</h3>
+                        <p class="text-sm text-gray-600">Estadísticas y análisis</p>
+                    </div>
+                </a>
+
+                <a th:href="@{/oficina/tickets}"
+                    class="flex items-center p-4 bg-white rounded-lg shadow hover:shadow-lg transition border-l-4 border-orange-500">
+                    <div class="bg-orange-100 rounded-full p-3 mr-4">
+                        <svg class="h-8 w-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-900">Revisar Tickets</h3>
+                        <p class="text-sm text-gray-600">Atender inconformidades</p>
+                    </div>
+                </a>
+
+            </div>
+        </div>
+
+        <!-- Tabla de planillas recientes — datos de ejemplo estáticos hasta que se implemente el módulo de planillas -->
+        <div class="px-4">
+            <h2 class="text-xl font-bold text-gray-900 mb-4">Planillas Recientes</h2>
+            <div class="bg-white rounded-lg shadow overflow-hidden">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                ID</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Empleado</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Periodo</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Horas Base</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Horas Extra</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Total Pago</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Estado</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <!-- Datos de ejemplo estáticos — se reemplazarán por iteración th:each cuando exista la entidad Planilla -->
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#001</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Juan Pérez García</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">03/02 - 08/02</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">48.0</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">6.0</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">S/ 950.00</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span
+                                    class="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                    GENERADA
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                <button class="text-blue-600 hover:text-blue-800 mr-3">Ver</button>
+                                <button class="text-green-600 hover:text-green-800">Pagar</button>
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#002</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">María López Sánchez</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">03/02 - 08/02</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">48.0</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">4.5</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">S/ 890.50</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                                    PAGADA
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                <button class="text-blue-600 hover:text-blue-800">Ver</button>
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#003</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Carlos Rodríguez Torres</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">03/02 - 08/02</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">46.5</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">8.0</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">S/ 1,025.75</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span
+                                    class="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                    GENERADA
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                <button class="text-blue-600 hover:text-blue-800 mr-3">Ver</button>
+                                <button class="text-green-600 hover:text-green-800">Pagar</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="mt-4 flex justify-end">
+                <a th:href="@{/oficina/planillas}"
+                    class="px-4 py-2 bg-primary text-white rounded-md hover:bg-blue-800 transition">
+                    Ver todas las planillas →
+                </a>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Pie de página común -->
+    <div th:replace="~{fragments/footer :: footer}"></div>
+
+</body>
+
+</html>
