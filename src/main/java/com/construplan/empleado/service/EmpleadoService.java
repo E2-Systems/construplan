@@ -1,5 +1,6 @@
 package com.construplan.empleado.service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -187,6 +188,32 @@ public class EmpleadoService {
                 .orElseThrow(() -> new IllegalStateException("Empleado no encontrado"));
     }
     
+    
+    
+ // ─── Perfil del empleado ─────────────────────────────────────────────────
+
+    /**
+     * Actualiza únicamente los campos editables del perfil del empleado.
+     * Los campos críticos (nombres, apellidos, dni, categoría, activo) no se modifican.
+     */
+    @Transactional
+    public Empleado actualizarPerfil(int idEmpleado, String direccion, String telefono,
+                                     LocalDate fechaNacimiento, String banco,
+                                     String cuentaBancaria) {
+        Empleado existente = empleadoRepository.findById(idEmpleado)
+                .orElseThrow(() -> new IllegalStateException("Empleado no encontrado"));
+
+        existente.setDireccion(direccion);
+        existente.setTelefono(telefono);
+        existente.setFechaNacimiento(fechaNacimiento);
+        existente.setBanco(banco);
+        existente.setCuentaBancaria(cuentaBancaria);
+
+        return empleadoRepository.save(existente);
+    }
+    
+    
+    
     // ─── Validación interna ───────────────────────────────────────────────────
 
     private void validarEmpleado(Empleado empleado) {
@@ -199,4 +226,8 @@ public class EmpleadoService {
         if (empleado.getDni() == null || empleado.getDni().trim().isEmpty())
             throw new IllegalArgumentException("El DNI es requerido");
     }
+    
+    
+    
+    
 }

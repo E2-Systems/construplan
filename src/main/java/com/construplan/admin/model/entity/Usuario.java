@@ -59,8 +59,8 @@ public class Usuario {
 	 @OneToOne(mappedBy = "usuario", fetch = FetchType.LAZY)
 	    private Empleado empleado;
 	
-	 //@PrePersist
-	   // protected void onCreate() {
-	     //   fechaCreacion = LocalDateTime.now();
-	    //}
+	 @PrePersist //Esto asegura que cada vez que se inserte un nuevo Usuario, se setee automáticamente la fecha.
+	   protected void onCreate() {
+	       fechaCreacion = LocalDateTime.now();
+	    }
 }

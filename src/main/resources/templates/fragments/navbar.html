@@ -26,7 +26,9 @@
                         <a th:href="@{/empleado/dashboard}"
                            th:classappend="${active == 'dashboard'} ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100'"
                            class="px-3 py-2 rounded-md text-sm font-medium">Inicio</a>
-
+						   <a th:href="@{/empleado/perfil}"
+						                             th:classappend="${active == 'perfil'} ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100'"
+						                             class="px-3 py-2 rounded-md text-sm font-medium">Mi Perfil</a>
                         <a th:href="@{/empleado/jornada}"
                            th:classappend="${active == 'jornada'} ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100'"
                            class="px-3 py-2 rounded-md text-sm font-medium">Mi Jornada</a>

@@ -1,4 +1,4 @@
-package com.construplan.service;
+package com.construplan.admin.service;
 
 import java.util.List;
 

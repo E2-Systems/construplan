@@ -56,7 +56,9 @@ public class UsuarioService {
 	        if (usuarioRepository.existsByUsername(usuario.getUsername()))
 	            throw new IllegalStateException("El nombre de usuario ya existe");
 
-	        usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
+	        //usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
+	        System.out.print("USUARIO?¨========");
+	        System.out.println(usuario);
 	        usuarioRepository.save(usuario);
 	        return true;
 	    }

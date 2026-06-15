@@ -1,4 +1,4 @@
-package com.construplan.controller;
+package com.construplan.auth.controller;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
