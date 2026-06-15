@@ -20,8 +20,7 @@ public class UsuarioDetailsService implements UserDetailsService {
 	  @Autowired
 	    private UsuarioRepository usuarioRepository;
 	  
-	  @Autowired
-	    private EmpleadoRepository empleadoRepository;
+	
 
 	    @Override
 	    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -32,12 +31,7 @@ public class UsuarioDetailsService implements UserDetailsService {
 	            throw new DisabledException("El usuario está inactivo");
 	        
 	      
-	        // Si es EMPLEADO debe tener un empleado asociado
-	        if (usuario.getRol() == Rol.EMPLEADO) {
-	            boolean tieneEmpleado = empleadoRepository.findByUsuario_Id(usuario.getId()).isPresent();
-	            if (!tieneEmpleado)
-	                throw new DisabledException("No existe empleado asociado al usuario");
-	        }
+	   
 
 	        
 	        return new org.springframework.security.core.userdetails.User(

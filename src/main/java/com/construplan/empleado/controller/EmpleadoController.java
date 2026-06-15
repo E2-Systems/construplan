@@ -3,6 +3,7 @@ package com.construplan.empleado.controller;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -41,7 +42,13 @@ public class EmpleadoController {
     	 String username = authentication.getName(); 
 
         // Obtener empleado desde el username autenticado — ya no viene de sesión manual
-        Empleado empleado = empleadoService.buscarPorUsername(username);
+    	  // Verificar si el empleado ya tiene registro en la tabla empleado
+         Optional<Empleado> optionalEmpleado = empleadoService.buscarOptionalPorUsername(username);
+         if (optionalEmpleado.isEmpty()) {
+             return "redirect:/empleado/perfil";
+         }
+
+         Empleado empleado = optionalEmpleado.get();
         int idEmpleado = empleado.getIdEmpleado();
         LocalDate hoy = LocalDate.now();
 
@@ -84,14 +91,20 @@ public class EmpleadoController {
     @GetMapping("/perfil")
     public String mostrarPerfil(Authentication authentication, Model model) {
         String username = authentication.getName();
-        Empleado empleado = empleadoService.buscarPorUsername(username);
+        Optional<Empleado> optionalEmpleado = empleadoService.buscarOptionalPorUsername(username);
 
-        model.addAttribute("empleado", empleado);
+     // Determinar si es primer registro o edición
+        boolean esNuevoRegistro = optionalEmpleado.isEmpty();
+        model.addAttribute("esNuevoRegistro", esNuevoRegistro);
+        model.addAttribute("empleado", optionalEmpleado.orElse(null));
         return "empleado/perfil";
     }
 
     @PostMapping("/perfil")
     public String guardarPerfil(Authentication authentication,
+    	     @RequestParam(required = false) String nombres,
+             @RequestParam(required = false) String apellidos,
+             @RequestParam(required = false) String dni,
                                 @RequestParam(required = false) String direccion,
                                 @RequestParam(required = false) String telefono,
                                 @RequestParam(required = false) String fechaNacimiento,
@@ -100,33 +113,60 @@ public class EmpleadoController {
                                 RedirectAttributes redirectAttributes) {
 
         String username = authentication.getName();
-        Empleado empleado = empleadoService.buscarPorUsername(username);
+        
 
         // Parsear fecha de nacimiento si se proporcionó
-        LocalDate fechaNacimientoParsed = null;
-        if (fechaNacimiento != null && !fechaNacimiento.isBlank()) {
-            try {
-                fechaNacimientoParsed = LocalDate.parse(fechaNacimiento);
-            } catch (DateTimeParseException exception) {
-                redirectAttributes.addFlashAttribute("error", "Formato de fecha inválido");
-                return "redirect:/empleado/perfil";
-            }
+        LocalDate fechaNacimientoParsed = parsearFecha(fechaNacimiento);
+        if (fechaNacimiento != null && !fechaNacimiento.isBlank() && fechaNacimientoParsed == null) {
+            redirectAttributes.addFlashAttribute("error", "Formato de fecha inválido");
+            return "redirect:/empleado/perfil";
         }
 
+        Optional<Empleado> optionalEmpleado = empleadoService.buscarOptionalPorUsername(username);
+
         try {
-            empleadoService.actualizarPerfil(
-                    empleado.getIdEmpleado(),
-                    direccion,
-                    telefono,
-                    fechaNacimientoParsed,
-                    banco,
-                    cuentaBancaria
-            );
-            redirectAttributes.addFlashAttribute("exito", "Datos actualizados correctamente");
+            if (optionalEmpleado.isEmpty()) {
+                // Primer registro: validar campos obligatorios
+                if (nombres == null || nombres.isBlank()
+                        || apellidos == null || apellidos.isBlank()
+                        || dni == null || dni.isBlank()) {
+                    redirectAttributes.addFlashAttribute("error",
+                            "Nombres, apellidos y DNI son obligatorios");
+                    return "redirect:/empleado/perfil";
+                }
+
+                empleadoService.crearRegistroInicial(
+                        username, nombres.trim(), apellidos.trim(), dni.trim(),
+                        direccion, telefono, fechaNacimientoParsed, banco, cuentaBancaria
+                );
+                redirectAttributes.addFlashAttribute("exito",
+                        "¡Registro completado! Ya puedes acceder a tu dashboard");
+            } else {
+                // Edición de perfil existente
+                empleadoService.actualizarPerfil(
+                        optionalEmpleado.get().getIdEmpleado(),
+                        direccion, telefono, fechaNacimientoParsed, banco, cuentaBancaria
+                );
+                redirectAttributes.addFlashAttribute("exito", "Datos actualizados correctamente");
+            }
         } catch (IllegalStateException exception) {
             redirectAttributes.addFlashAttribute("error", exception.getMessage());
+            return "redirect:/empleado/perfil";
         }
 
         return "redirect:/empleado/perfil";
+    }
+
+    // ─── Utilidades privadas ─────────────────────────────────────────────────
+
+    private LocalDate parsearFecha(String fecha) {
+        if (fecha == null || fecha.isBlank()) {
+            return null;
+        }
+        try {
+            return LocalDate.parse(fecha);
+        } catch (DateTimeParseException exception) {
+            return null;
+        }
     }
 }

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Empleados - ConstruPlan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#004E89',
+                        secondary: '#FF6B35',
+                        accent: '#FFD23F',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-gray-50 flex flex-col min-h-screen">
+
+    <!-- Navbar -->
+    <div th:replace="~{fragments/navbar :: navbar('empleados')}"></div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 w-full flex-grow">
+        <!-- Mensajes flash -->
+        <div class="mb-4" th:if="${mensaje}">
+            <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded shadow-sm" role="alert">
+                <span class="block sm:inline" th:text="${mensaje}"></span>
+            </div>
+        </div>
+        <div class="mb-4" th:if="${error}">
+            <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded shadow-sm" role="alert">
+                <span class="block sm:inline" th:text="${error}"></span>
+            </div>
+        </div>
+
+        <!-- Encabezado -->
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900">Gestión de Personal y Salarios</h1>
+                <p class="text-sm text-gray-600 mt-1">
+                    Administra las categorías de obra y los acuerdos salariales particulares de cada trabajador.
+                </p>
+            </div>
+            <div class="mt-4 md:mt-0">
+                <a th:href="@{/oficina/dashboard}"
+                    class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition text-sm font-medium">
+                    ← Volver al Dashboard
+                </a>
+            </div>
+        </div>
+
+        <!-- Tabla de Empleados -->
+        <div class="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100 mb-8">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Empleado</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">DNI</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Categoría</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Sueldo Pactado</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Frecuencia</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Estado</th>
+                            <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-100">
+                        <tr th:each="emp : ${empleados}" class="hover:bg-gray-50 transition duration-150">
+                            <!-- Datos del empleado -->
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0 h-10 w-10 bg-blue-100 text-primary font-bold rounded-full flex items-center justify-center">
+                                        <span th:text="${#strings.substring(emp.nombres, 0, 1) + #strings.substring(emp.apellidos, 0, 1)}">EP</span>
+                                    </div>
+                                    <div class="ml-4">
+                                        <div class="text-sm font-semibold text-gray-900" th:text="${emp.nombreCompleto}">Juan Pérez</div>
+                                        <div class="text-xs text-gray-500" th:text="${emp.tieneAccesoSistema ? 'Tiene acceso al sistema' : 'Sin acceso al sistema'}">Acceso</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700" th:text="${emp.dni}">45879652</td>
+                            
+                            <!-- Categoría -->
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span th:if="${emp.categoria != null}"
+                                      th:classappend="${emp.categoria.name() == 'OPERARIO' ? 'bg-indigo-100 text-indigo-800' : (emp.categoria.name() == 'OFICIAL' ? 'bg-blue-100 text-blue-800' : 'bg-amber-100 text-amber-800')}"
+                                      class="px-3 py-1 rounded-full text-xs font-bold" 
+                                      th:text="${emp.categoria}">
+                                    OPERARIO
+                                </span>
+                                <span th:if="${emp.categoria == null}" class="text-xs text-gray-400 italic">Sin categoría</span>
+                            </td>
+
+                            <!-- Sueldo Pactado -->
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-950">
+                                <span th:if="${sueldosActivos.containsKey(emp.idEmpleado)}" 
+                                      th:text="'S/ ' + ${#numbers.formatDecimal(sueldosActivos.get(emp.idEmpleado).sueldo, 1, 'COMMA', 2, 'POINT')}">
+                                    S/ 85.00
+                                </span>
+                                <span th:unless="${sueldosActivos.containsKey(emp.idEmpleado)}" class="text-xs text-red-500 font-normal italic">Sin tarifa activa</span>
+                            </td>
+
+                            <!-- Frecuencia -->
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                <span th:if="${sueldosActivos.containsKey(emp.idEmpleado)}" 
+                                      th:text="${sueldosActivos.get(emp.idEmpleado).periodo}">
+                                    DIARIO
+                                </span>
+                                <span th:unless="${sueldosActivos.containsKey(emp.idEmpleado)}" class="text-xs text-gray-400 italic">—</span>
+                            </td>
+
+                            <!-- Estado Activo -->
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span th:if="${emp.activo}" class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                    Activo
+                                </span>
+                                <span th:unless="${emp.activo}" class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                                    Inactivo
+                                </span>
+                            </td>
+
+                            <!-- Acciones -->
+                            <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
+                                <a th:href="@{/oficina/empleados/gestionar/{id}(id=${emp.idEmpleado})}"
+                                   class="text-primary hover:text-blue-800 font-semibold bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-md transition duration-150">
+                                    Gestionar Tarifa
+                                </a>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(empleados)}">
+                            <td colspan="7" class="px-6 py-10 text-center text-sm text-gray-500">
+                                No se encontraron empleados registrados en el sistema.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div th:replace="~{fragments/footer :: footer}"></div>
+
+</body>
+
+</html>

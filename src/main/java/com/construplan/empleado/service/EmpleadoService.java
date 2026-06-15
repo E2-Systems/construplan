@@ -1,8 +1,10 @@
 package com.construplan.empleado.service;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -11,9 +13,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.construplan.admin.model.entity.Usuario;
 import com.construplan.admin.repository.UsuarioRepository;
+import com.construplan.empleado.model.entity.Categoria;
 import com.construplan.empleado.model.entity.Empleado;
 import com.construplan.empleado.repository.EmpleadoRepository;
 import com.construplan.model.entity.Rol;
+import com.construplan.oficina.model.entity.PeriodoPago;
+import com.construplan.oficina.service.SueldoService;
 
 @Service
 public class EmpleadoService {
@@ -26,6 +31,9 @@ public class EmpleadoService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private SueldoService sueldoService;
+    
     // ─── Consultas ────────────────────────────────────────────────────────────
 
     public Empleado obtenerPorId(int id) {
@@ -65,10 +73,10 @@ public class EmpleadoService {
         return empleadoRepository.findByUsuarioIsNotNull();
     }
 
-    public List<Empleado> buscarPorCategoria(String categoria) {
-        if (categoria == null || categoria.trim().isEmpty())
+    public List<Empleado> buscarPorCategoria(Categoria categoria) {
+        if (categoria == null)
             throw new IllegalArgumentException("Categoría no puede estar vacía");
-        return empleadoRepository.findByCategoria(categoria.trim());
+        return empleadoRepository.findByCategoria(categoria);
     }
 
     // ─── Conteos ──────────────────────────────────────────────────────────────
@@ -161,14 +169,14 @@ public class EmpleadoService {
     }
 
     @Transactional
-    public boolean actualizarCategoria(int idEmpleado, String nuevaCategoria) {
-        if (nuevaCategoria == null || nuevaCategoria.trim().isEmpty())
+    public boolean actualizarCategoria(int idEmpleado, Categoria nuevaCategoria) {
+        if (nuevaCategoria == null)
             throw new IllegalArgumentException("Categoría no puede estar vacía");
 
         Empleado empleado = empleadoRepository.findById(idEmpleado)
                 .orElseThrow(() -> new IllegalStateException("Empleado no encontrado"));
 
-        empleado.setCategoria(nuevaCategoria.trim());
+        empleado.setCategoria(nuevaCategoria);
         empleadoRepository.save(empleado);
         return true;
     }
@@ -188,6 +196,53 @@ public class EmpleadoService {
                 .orElseThrow(() -> new IllegalStateException("Empleado no encontrado"));
     }
     
+
+    /**
+     * Busca un empleado por username sin lanzar excepción.
+     * Retorna Optional vacío si no existe registro en la tabla empleado.
+     */
+    public Optional<Empleado> buscarOptionalPorUsername(String username) {
+        return empleadoRepository.findByUsuario_Username(username);
+    }
+
+    /**
+     * Crea el registro inicial en la tabla empleado para un usuario que acaba de registrarse.
+     * Se requieren nombres, apellidos y DNI como datos mínimos obligatorios.
+     */
+    @Transactional
+    public Empleado crearRegistroInicial(String username, String nombres, String apellidos,
+                                         String dni, String direccion, String telefono,
+                                         LocalDate fechaNacimiento, String banco,
+                                         String cuentaBancaria) {
+        // Validar que no exista ya un empleado con ese username
+        if (empleadoRepository.findByUsuario_Username(username).isPresent()) {
+            throw new IllegalStateException("Ya existe un registro de empleado para este usuario");
+        }
+
+        // Validar que el DNI no esté duplicado
+        if (empleadoRepository.findByDni(dni).isPresent()) {
+            throw new IllegalStateException("Ya existe un empleado registrado con ese DNI");
+        }
+
+        // Obtener el usuario asociado
+        Usuario usuario = usuarioRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalStateException("Usuario no encontrado"));
+
+        Empleado empleado = Empleado.builder()
+                .usuario(usuario)
+                .nombres(nombres)
+                .apellidos(apellidos)
+                .dni(dni)
+                .direccion(direccion)
+                .telefono(telefono)
+                .fechaNacimiento(fechaNacimiento)
+                .banco(banco)
+                .cuentaBancaria(cuentaBancaria)
+                .activo(true)
+                .build();
+
+        return empleadoRepository.save(empleado);
+    }
     
     
  // ─── Perfil del empleado ─────────────────────────────────────────────────
@@ -212,6 +267,23 @@ public class EmpleadoService {
         return empleadoRepository.save(existente);
     }
     
+    
+
+    /**
+     * Actualiza la categoría del empleado y registra un nuevo acuerdo de sueldo
+     * en el historial salarial llamando a SueldoService.
+     */
+    @Transactional
+    public void actualizarCategoriaYSueldo(int idEmpleado, Categoria categoria, BigDecimal sueldo,
+                                           PeriodoPago periodo, LocalDate fechaInicio) {
+        Empleado empleado = empleadoRepository.findById(idEmpleado)
+                .orElseThrow(() -> new IllegalStateException("Empleado no encontrado"));
+
+        empleado.setCategoria(categoria);
+        empleadoRepository.save(empleado);
+
+        sueldoService.registrarNuevoSueldo(idEmpleado, sueldo, periodo, fechaInicio);
+    }
     
     
     // ─── Validación interna ───────────────────────────────────────────────────

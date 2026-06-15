@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import com.construplan.empleado.model.entity.Categoria;
 import com.construplan.empleado.model.entity.Empleado;
 @Repository
 public interface EmpleadoRepository extends JpaRepository<Empleado, Integer> {
@@ -19,7 +20,7 @@ public interface EmpleadoRepository extends JpaRepository<Empleado, Integer> {
     Optional<Empleado> findByUsuario_Username(@Param("username") String username);
     
  // buscarPorCategoria
-    List<Empleado> findByCategoria(String categoria);
+    List<Empleado> findByCategoria(Categoria categoria);
 
     // listarActivos / listarInactivos
     List<Empleado> findByActivoTrue();
