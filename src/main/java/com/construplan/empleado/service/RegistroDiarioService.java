@@ -135,4 +135,36 @@ public class RegistroDiarioService {
     public List<RegistroDiario> obtenerUltimosRegistros(int idEmpleado) {
         return registroDiarioRepository.findUltimosRegistrosPorEmpleado(idEmpleado);
     }
+
+    // Obtiene registros filtrados por estado para la vista de validación
+    public List<RegistroDiario> obtenerRegistrosPorEstado(EstadoRegistro estado) {
+        return registroDiarioRepository.findByEstado(estado);
+    }
+
+    // Conteo rápido de registros por estado para indicadores del dashboard
+    public long contarRegistrosPorEstado(EstadoRegistro estado) {
+        return registroDiarioRepository.countByEstado(estado);
+    }
+
+    // Aprueba un registro diario cambiando su estado a APROBADO
+    @Transactional
+    public RegistroDiario aprobarRegistro(int idRegistro) {
+        RegistroDiario registro = registroDiarioRepository.findById(idRegistro)
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "No se encontró el registro con ID: " + idRegistro));
+
+        registro.setEstado(EstadoRegistro.APROBADO);
+        return registroDiarioRepository.save(registro);
+    }
+
+    // Marca un registro como observado para revisión posterior
+    @Transactional
+    public RegistroDiario observarRegistro(int idRegistro) {
+        RegistroDiario registro = registroDiarioRepository.findById(idRegistro)
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "No se encontró el registro con ID: " + idRegistro));
+
+        registro.setEstado(EstadoRegistro.OBSERVADO);
+        return registroDiarioRepository.save(registro);
+    }
 }
