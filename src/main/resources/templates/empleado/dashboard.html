@@ -35,7 +35,44 @@
                 <span id="reloj-header"></span>
             </p>
         </div>
-
+		<!-- Alerta de Tarea Asignada para Hoy -->
+		     <div class="px-4 mb-6" th:if="${asignacionPendiente != null}">
+		         <div class="bg-blue-50 border-l-4 border-primary p-5 rounded-lg shadow-sm">
+		             <div class="flex items-start">
+		                 <div class="flex-shrink-0">
+		                     <svg class="h-6 w-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+		                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+		                               d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+		                     </svg>
+		                 </div>
+		                 <div class="ml-3 flex-grow">
+		                     <h3 class="text-sm font-bold text-primary">Tarea Asignada Pendiente</h3>
+		                     <div class="mt-2 text-sm text-gray-700">
+		                         <p class="mb-1">Tienes una actividad asignada para realizar hoy en obra:</p>
+		                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-3 p-3 bg-white rounded-md border border-blue-100">
+		                             <div>
+		                                 <span class="block text-xs font-semibold text-gray-400 uppercase">Actividad</span>
+		                                 <span class="text-sm font-bold text-gray-900" th:text="${asignacionPendiente.meta.tarea.nombre}">Instalación de tuberías</span>
+		                             </div>
+		                             <div>
+		                                 <span class="block text-xs font-semibold text-gray-400 uppercase">Meta a Cumplir</span>
+		                                 <span class="text-sm font-bold text-gray-900" 
+		                                       th:text="${#numbers.formatDecimal(asignacionPendiente.meta.cantidad, 1, 0)} + ' ' + ${asignacionPendiente.meta.tarea.unidadMedida}">50 metros</span>
+		                             </div>
+		                             <div>
+		                                 <span class="block text-xs font-semibold text-gray-400 uppercase">Proyecto / Obra</span>
+		                                 <span class="text-sm font-bold text-gray-900" th:text="${asignacionPendiente.proyecto.nombre}">Obra Las Acacias</span>
+		                             </div>
+		                             <div>
+		                                 <span class="block text-xs font-semibold text-gray-400 uppercase">Asignado Por</span>
+		                                 <span class="text-sm font-bold text-gray-900" th:text="${asignacionPendiente.asignador.username}">supervisor1</span>
+		                             </div>
+		                         </div>
+		                     </div>
+		                 </div>
+		             </div>
+		         </div>
+		     </div>
         <!-- Registro Rápido de Asistencia -->
         <div class="px-4 mb-8">
             <div class="bg-gradient-to-r from-primary to-blue-800 rounded-lg shadow-xl p-6 text-white">

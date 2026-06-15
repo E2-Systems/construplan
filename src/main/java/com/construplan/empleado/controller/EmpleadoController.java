@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.construplan.campo.model.entity.AsignacionTarea;
 import com.construplan.campo.repository.AsignacionTareaRepository;
 import com.construplan.empleado.model.entity.Empleado;
 import com.construplan.empleado.service.EmpleadoService;
@@ -68,10 +69,14 @@ public class EmpleadoController {
         
      // Determinar si puede reportar su tarea como completada (tiene tarea hoy y aún no tiene hora de fin/completada)
         boolean puedeCompletarTarea = false;
+        AsignacionTarea asignacionPendiente = null;
         var asignacionesHoy = asignacionTareaRepository.findByEmpleadoAndFechaRange(idEmpleado, hoy, hoy);
         if (!asignacionesHoy.isEmpty()) {
-            var asignacion = asignacionesHoy.get(0);
+        	   AsignacionTarea asignacion = asignacionesHoy.get(0);
             puedeCompletarTarea = (asignacion.getHoraMetaCompletada() == null);
+            if (puedeCompletarTarea) {
+                asignacionPendiente = asignacion;
+            }
         }
 
         model.addAttribute("empleado",         empleado);
@@ -81,6 +86,8 @@ public class EmpleadoController {
         model.addAttribute("ticketsAbiertos",   0);// TODO: Implementar conteo de tickets cuando se integre TicketRepository
         model.addAttribute("estadoAsistencia",  estadoAsistencia);
         model.addAttribute("idRegistroActivo",  idRegistroActivo);
+        model.addAttribute("puedeCompletarTarea", puedeCompletarTarea);
+        model.addAttribute("asignacionPendiente", asignacionPendiente);
         model.addAttribute("ultimosRegistros",  registroDiarioService.obtenerUltimosRegistros(idEmpleado));
         return "empleado/dashboard";
     }
