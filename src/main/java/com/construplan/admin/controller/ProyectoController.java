@@ -13,93 +13,97 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.construplan.admin.model.entity.Proyecto;
 import com.construplan.admin.service.ProyectoService;
+/**
+ * Controlador de Spring MVC para la administración de proyectos por parte del Administrador.
+ * Gestiona operaciones de visualización, creación, modificación, activación y eliminación.
+ */
 
 @Controller
-@RequestMapping("/campo/proyectos")
+@RequestMapping("/admin/proyectos")
 public class ProyectoController {
 	  @Autowired
 	    private ProyectoService proyectoService;
 
 	    @GetMapping
-	    public String listar(Model model) {
+	    public String list(Model model) {
 	        model.addAttribute("proyectos", proyectoService.listarTodos());
-	        return "campo/proyectos";
+	        return "admin/proyectos";
 	    }
 
 	    @GetMapping("/nuevo")
-	    public String formularioCrear(Model model) {
+	    public String formCreate(Model model) {
 	        model.addAttribute("proyecto", new Proyecto());
 	        model.addAttribute("action", "create");
-	        return "campo/proyecto-form";
+	        return "admin/proyecto-form";
 	    }
 
 	    @GetMapping("/{id}/editar")
-	    public String formularioEditar(@PathVariable int id, Model model,
+	    public String formEdit(@PathVariable int id, Model model,
 	                                   RedirectAttributes redirectAttrs) {
 	        try {
 	            model.addAttribute("proyecto", proyectoService.obtenerPorId(id));
 	            model.addAttribute("action", "update");
-	            return "campo/proyecto-form";
-	        } catch (IllegalStateException e) {
-	            redirectAttrs.addFlashAttribute("error", e.getMessage());
-	            return "redirect:/campo/proyectos";
+	            return "admin/proyecto-form";
+	        } catch (IllegalStateException exception) {
+	            redirectAttrs.addFlashAttribute("error", exception.getMessage());
+	            return "redirect:/admin/proyectos";
 	        }
 	    }
 
 	    @PostMapping
-	    public String crear(@ModelAttribute Proyecto proyecto, Model model,
+	    public String create(@ModelAttribute Proyecto proyecto, Model model,
 	                        RedirectAttributes redirectAttrs) {
 	        try {
 	            proyectoService.guardar(proyecto);
 	            redirectAttrs.addFlashAttribute("mensaje", "Proyecto creado exitosamente");
-	            return "redirect:/campo/proyectos";
-	        } catch (IllegalArgumentException | IllegalStateException e) {
-	            model.addAttribute("error", e.getMessage());
+	            return "redirect:/admin/proyectos";
+	        } catch (IllegalArgumentException | IllegalStateException exception) {
+	            model.addAttribute("error", exception.getMessage());
 	            model.addAttribute("proyecto", proyecto);
 	            model.addAttribute("action", "create");
-	            return "campo/proyecto-form";
+	            return "admin/proyecto-form";
 	        }
 	    }
 
 	    @PostMapping("/{id}")
-	    public String actualizar(@PathVariable int id,
+	    public String update(@PathVariable int id,
 	                             @ModelAttribute Proyecto proyecto,
 	                             Model model, RedirectAttributes redirectAttrs) {
 	        proyecto.setIdProyecto(id);
 	        try {
 	            proyectoService.actualizar(proyecto);
 	            redirectAttrs.addFlashAttribute("mensaje", "Proyecto actualizado exitosamente");
-	            return "redirect:/campo/proyectos";
-	        } catch (IllegalArgumentException | IllegalStateException e) {
-	            model.addAttribute("error", e.getMessage());
+	            return "redirect:/admin/proyectos";
+	        } catch (IllegalArgumentException | IllegalStateException exception) {
+	            model.addAttribute("error", exception.getMessage());	       
 	            model.addAttribute("proyecto", proyecto);
 	            model.addAttribute("action", "update");
-	            return "campo/proyecto-form";
+	            return "admin/proyecto-form";
 	        }
 	    }
 
 	    @PostMapping("/{id}/estado")
-	    public String cambiarEstado(@PathVariable int id,
+	    public String changeStatus(@PathVariable int id,
 	                                @RequestParam boolean activo,
 	                                RedirectAttributes redirectAttrs) {
 	        try {
 	            proyectoService.activarDesactivar(id, activo);
 	            redirectAttrs.addFlashAttribute("mensaje",
 	                    activo ? "Proyecto activado" : "Proyecto desactivado");
-	        } catch (IllegalStateException e) {
-	            redirectAttrs.addFlashAttribute("error", e.getMessage());
+	        } catch (IllegalStateException exception) {
+	            redirectAttrs.addFlashAttribute("error", exception.getMessage());
 	        }
-	        return "redirect:/campo/proyectos";
+	        return "redirect:/admin/proyectos";
 	    }
 
 	    @PostMapping("/{id}/eliminar")
-	    public String eliminar(@PathVariable int id, RedirectAttributes redirectAttrs) {
+	    public String delete(@PathVariable int id, RedirectAttributes redirectAttrs) {
 	        try {
 	            proyectoService.eliminar(id);
 	            redirectAttrs.addFlashAttribute("mensaje", "Proyecto eliminado exitosamente");
-	        } catch (IllegalStateException e) {
-	            redirectAttrs.addFlashAttribute("error", e.getMessage());
+	        } catch (IllegalStateException exception) {
+	            redirectAttrs.addFlashAttribute("error", exception.getMessage());
 	        }
-	        return "redirect:/campo/proyectos";
+	        return "redirect:/admin/proyectos";
 	    }
 }

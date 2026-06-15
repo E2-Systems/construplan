@@ -52,9 +52,7 @@
                            th:classappend="${active == 'dashboard'} ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100'"
                            class="px-3 py-2 rounded-md text-sm font-medium">Inicio</a>
 
-                        <a th:href="@{/campo/proyectos}"
-                           th:classappend="${active == 'proyectos'} ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100'"
-                           class="px-3 py-2 rounded-md text-sm font-medium">Proyectos</a>
+                       
 
                         <a th:href="@{/campo/tareas}"
                            th:classappend="${active == 'tareas'} ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100'"
@@ -117,7 +115,9 @@
                         <a th:href="@{/admin/empleados}"
                            th:classappend="${active == 'empleados'} ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100'"
                            class="px-3 py-2 rounded-md text-sm font-medium">Empleados</a>
-
+						   <a th:href="@{/admin/proyectos}"
+						                         th:classappend="${active == 'proyectos'} ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100'"
+						                         class="px-3 py-2 rounded-md text-sm font-medium">Proyectos</a>
                         <a th:href="@{/admin/configuracion}"
                            th:classappend="${active == 'configuracion'} ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100'"
                            class="px-3 py-2 rounded-md text-sm font-medium">Configuración</a>
