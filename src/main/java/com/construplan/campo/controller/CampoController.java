@@ -12,7 +12,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.construplan.empleado.model.entity.EstadoRegistro;
+import com.construplan.empleado.model.entity.EstadoTicket;
 import com.construplan.empleado.service.RegistroDiarioService;
+import com.construplan.empleado.service.TicketService;
 
 @Controller
 @RequestMapping("/campo")
@@ -22,6 +24,9 @@ public class CampoController {
 	 @Autowired
 	    private RegistroDiarioService registroDiarioService;
 	 
+	 @Autowired
+	    private TicketService ticketService;
+	 
     @GetMapping("/dashboard")
     public String dashboard(Authentication authentication, Model model) {
 
@@ -30,7 +35,7 @@ public class CampoController {
         // Valores fijos hasta implementar los services
      // Conteo real de registros pendientes desde la base de datos
         long registrosPendientes = registroDiarioService.contarRegistrosPorEstado(EstadoRegistro.PENDIENTE);
-        int ticketsAbiertos     = 0;
+        long ticketsAbiertos     = ticketService.countByStatus(EstadoTicket.ABIERTO) + ticketService.countByStatus(EstadoTicket.EN_REVISION);
         int empleadosActivos    = 0;
         int tareasSemanales     = 0;
 

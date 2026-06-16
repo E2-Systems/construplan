@@ -97,7 +97,10 @@
                            th:classappend="${active == 'ajustes'} ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100'"
                            class="px-3 py-2 rounded-md text-sm font-medium">Ajustes</a>
 
-                        <a th:href="@{/reportes}"
+						   <a th:href="@{/tickets}"
+						                             th:classappend="${active == 'tickets'} ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100'"
+						                             class="px-3 py-2 rounded-md text-sm font-medium">Tickets</a>
+						     <a th:href="@{/reportes}"
                            th:classappend="${active == 'reportes'} ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100'"
                            class="px-3 py-2 rounded-md text-sm font-medium">Reportes</a>
                     </th:block>

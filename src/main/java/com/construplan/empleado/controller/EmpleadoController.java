@@ -22,6 +22,7 @@ import com.construplan.campo.repository.AsignacionTareaRepository;
 import com.construplan.empleado.model.entity.Empleado;
 import com.construplan.empleado.service.EmpleadoService;
 import com.construplan.empleado.service.RegistroDiarioService;
+import com.construplan.empleado.service.TicketService;
 
 @Controller
 @RequestMapping("/empleado")
@@ -36,6 +37,9 @@ public class EmpleadoController {
 
     @Autowired
     private AsignacionTareaRepository asignacionTareaRepository;
+    
+    @Autowired
+    private TicketService ticketService;
 
     @GetMapping("/dashboard")
     public String dashboard(Authentication authentication, Model model) {
@@ -83,7 +87,7 @@ public class EmpleadoController {
         model.addAttribute("fechaActual",       hoy.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
         model.addAttribute("horasSemanales",    horasSemanales);
         model.addAttribute("horasExtras",       horasExtras);
-        model.addAttribute("ticketsAbiertos",   0);// TODO: Implementar conteo de tickets cuando se integre TicketRepository
+        model.addAttribute("ticketsAbiertos", ticketService.getOpenTicketCountByEmployee(idEmpleado));
         model.addAttribute("estadoAsistencia",  estadoAsistencia);
         model.addAttribute("idRegistroActivo",  idRegistroActivo);
         model.addAttribute("puedeCompletarTarea", puedeCompletarTarea);

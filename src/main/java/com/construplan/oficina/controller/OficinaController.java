@@ -25,7 +25,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.construplan.empleado.model.entity.Categoria;
 import com.construplan.empleado.model.entity.Empleado;
+import com.construplan.empleado.model.entity.EstadoTicket;
 import com.construplan.empleado.service.EmpleadoService;
+import com.construplan.empleado.service.TicketService;
 import com.construplan.oficina.model.entity.EstadoPlanilla;
 import com.construplan.oficina.model.entity.PeriodoPago;
 import com.construplan.oficina.model.entity.Planilla;
@@ -50,6 +52,9 @@ public class OficinaController {
 
 	    @Autowired
 	    private AjustePlanillaRepository ajustePlanillaRepository;
+	    
+	    @Autowired
+	    private TicketService ticketService;
 	    
     @GetMapping("/dashboard")
     public String dashboard(Model model) {
@@ -78,7 +83,7 @@ public class OficinaController {
 
      // Contadores de alertas pendientes reales
         long ajustesPendientes = ajustePlanillaRepository.countByPlanilla_Estado(EstadoPlanilla.GENERADA);
-        int ticketsPendientes = 5;
+        long ticketsPendientes = ticketService.countByStatus(EstadoTicket.ABIERTO) + ticketService.countByStatus(EstadoTicket.EN_REVISION);
 
      // Obtener las últimas 5 planillas reales generadas para mostrar en la tabla de planillas recientes
         List<Planilla> planillasRecientes = planillaRepository.findAllWithEmpleado().stream()
