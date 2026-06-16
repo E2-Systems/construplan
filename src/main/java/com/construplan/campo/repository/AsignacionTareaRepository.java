@@ -28,4 +28,14 @@ public interface AsignacionTareaRepository extends JpaRepository<AsignacionTarea
 	    List<AsignacionTarea> findByAsignadorId(int id);
 
 	    boolean existsByEmpleadoIdEmpleadoAndFecha(int idEmpleado, LocalDate fecha);
+	    
+
+	    @Query("SELECT a FROM AsignacionTarea a " +
+	           "JOIN FETCH a.proyecto " +
+	           "JOIN FETCH a.empleado " +
+	           "JOIN FETCH a.meta m " +
+	           "JOIN FETCH m.tarea " +
+	           "WHERE a.fecha BETWEEN :inicio AND :fin " +
+	           "ORDER BY a.fecha DESC")
+	    List<AsignacionTarea> findByFechaBetween(@Param("inicio") LocalDate inicio, @Param("fin") LocalDate fin);
 }

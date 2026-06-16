@@ -30,13 +30,6 @@
            class="inline-block bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition duration-200">
             Ir al inicio
         </a>
-		<form th:action="@{/logout}" method="post" class="ml-4">
-		                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-		                    <button type="submit"
-		                            class="px-4 py-2 rounded-md text-sm font-medium bg-red-600 text-white hover:bg-red-700 transition">
-		                        Cerrar Sesión
-		                    </button>
-		                </form>
     </div>
 </body>
 </html>
