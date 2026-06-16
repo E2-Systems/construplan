@@ -415,5 +415,13 @@ public class PlanillaService {
                 .pendingPayrolls(planillasPendientes)
                 .build();
     }
+    
+    /**
+     * Obtiene el historial completo de planillas para un empleado determinado.
+     * Ordenado de la planilla más reciente a la más antigua.
+     */
+    public List<Planilla> getPayrollsByEmployee(int idEmpleado) {
+        return planillaRepository.findByEmpleado_IdEmpleadoOrderByFechaInicioDesc(idEmpleado);
+    }
 }
 

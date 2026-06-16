@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recibo de Pago Digital - ConstruPlan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#004E89',
+                        secondary: '#FF6B35',
+                        accent: '#FFD23F',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 flex flex-col min-h-screen">
+
+    <!-- Navbar -->
+    <div th:replace="~{fragments/navbar :: navbar('pago')}"></div>
+
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 w-full flex-grow mb-8">
+
+        <!-- Botón Volver -->
+        <div class="mb-6">
+            <a th:href="@{/empleado/planillas}"
+                class="inline-flex items-center px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition text-sm font-semibold shadow-sm">
+                ← Volver a Mis Planillas
+            </a>
+        </div>
+
+        <!-- Recibo Estilo Boleta de Pago -->
+        <div class="bg-white rounded-3xl shadow-xl border border-gray-200 overflow-hidden">
+            <!-- Encabezado de la Boleta -->
+            <div class="bg-gradient-to-br from-primary to-blue-900 p-8 text-white relative">
+                <!-- Sello de Estado en la esquina superior derecha -->
+                <div class="absolute top-8 right-8">
+                    <span th:if="${planilla.estado.name() == 'PAGADA'}"
+                          class="px-4 py-1.5 bg-green-500/20 text-green-300 border border-green-500/30 text-xs font-black uppercase tracking-widest rounded-full">
+                        PAGADA
+                    </span>
+                    <span th:if="${planilla.estado.name() == 'GENERADA'}"
+                          class="px-4 py-1.5 bg-amber-500/20 text-accent border border-amber-500/30 text-xs font-black uppercase tracking-widest rounded-full">
+                        PENDIENTE
+                    </span>
+                </div>
+
+                <div class="flex items-center gap-4 mb-4">
+                    <svg width="45" height="45" viewBox="0 0 50 50">
+                        <rect x="5" y="15" width="15" height="30" fill="#FF6B35" rx="2"/>
+                        <rect x="25" y="10" width="15" height="35" fill="#FFFFFF" rx="2"/>
+                        <path d="M10 10 L25 5 L40 10" stroke="#FFD23F" stroke-width="3" stroke-linecap="round"/>
+                    </svg>
+                    <div>
+                        <h2 class="text-2xl font-black tracking-tight">CONSTRUPLAN S.A.C.</h2>
+                        <p class="text-xs text-blue-200 font-medium">RUC: 20123456789 • Obras y Construcciones Civiles</p>
+                    </div>
+                </div>
+                <hr class="border-white/10 my-4">
+                <div class="flex flex-col sm:flex-row sm:justify-between gap-4">
+                    <div>
+                        <span class="block text-[10px] font-bold text-blue-200 uppercase tracking-wider">Recibo de Pago N°</span>
+                        <span class="text-lg font-black text-white" th:text="'PL-' + ${planilla.idPlanilla}">PL-123</span>
+                    </div>
+                    <div>
+                        <span class="block text-[10px] font-bold text-blue-200 uppercase tracking-wider">Periodo de Pago</span>
+                        <span class="text-sm font-bold text-white" 
+                              th:text="${#temporals.format(planilla.fechaInicio, 'dd/MM/yyyy') + ' al ' + #temporals.format(planilla.fechaFin, 'dd/MM/yyyy')}">
+                              09/06/2026 al 14/06/2026
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Información del Trabajador -->
+            <div class="p-8 border-b border-gray-100 bg-gray-50/50">
+                <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Información del Trabajador</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div>
+                        <span class="block text-xs font-medium text-gray-400">Nombres y Apellidos</span>
+                        <span class="text-sm font-bold text-gray-900" th:text="${empleado.nombreCompleto}">Juan Pérez</span>
+                    </div>
+                    <div>
+                        <span class="block text-xs font-medium text-gray-400">Documento de Identidad</span>
+                        <span class="text-sm font-bold text-gray-900" th:text="'DNI: ' + ${empleado.dni}">DNI</span>
+                    </div>
+                    <div>
+                        <span class="block text-xs font-medium text-gray-400">Categoría Laboral</span>
+                        <span class="text-sm font-bold text-primary" th:text="${empleado.categoria}">OPERARIO</span>
+                    </div>
+                    <div>
+                        <span class="block text-xs font-medium text-gray-400">Banco de Depósito</span>
+                        <span class="text-sm font-bold text-gray-900" th:text="${empleado.banco != null ? empleado.banco : '-'}">BCP</span>
+                    </div>
+                    <div>
+                        <span class="block text-xs font-medium text-gray-400">Cuenta Bancaria</span>
+                        <span class="text-sm font-bold text-gray-900 font-mono" th:text="${empleado.cuentaBancaria != null ? empleado.cuentaBancaria : '-'}">Cuenta</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Desglose de Jornales Diarios -->
+            <div class="p-8 border-b border-gray-100">
+                <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Detalle Diario de Asistencia y Jornal</h3>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-100 text-sm">
+                        <thead>
+                            <tr class="text-gray-400 font-semibold">
+                                <th class="pb-3 text-left">Fecha del Día</th>
+                                <th class="pb-3 text-center">Horas Base</th>
+                                <th class="pb-3 text-center">Horas Extra</th>
+                                <th class="pb-3 text-right">Pago Diario</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100 text-gray-700">
+                            <tr th:each="d : ${planilla.detalles}" class="align-middle">
+                                <td class="py-3 font-medium text-gray-900" th:text="${#temporals.format(d.fecha, 'EEEE dd/MM/yyyy')}">Lunes 09/06/2026</td>
+                                <td class="py-3 text-center" th:text="${d.horasBase}">8.50</td>
+                                <td class="py-3 text-center">
+                                    <span th:if="${d.horasExtra.compareTo(T(java.math.BigDecimal).ZERO) > 0}" 
+                                          class="text-secondary font-semibold" 
+                                          th:text="${d.horasExtra}">1.50</span>
+                                    <span th:unless="${d.horasExtra.compareTo(T(java.math.BigDecimal).ZERO) > 0}" 
+                                          class="text-gray-400">0.00</span>
+                                </td>
+                                <td class="py-3 text-right font-bold text-gray-950" 
+                                    th:text="'S/ ' + ${#numbers.formatDecimal(d.pagoDia, 1, 'COMMA', 2, 'POINT')}">S/ 200.00</td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr class="font-bold text-gray-900 border-t border-gray-200">
+                                <td class="pt-3 text-left">Subtotales Acumulados</td>
+                                <td class="pt-3 text-center" th:text="${planilla.totalHorasBase}">51.00</td>
+                                <td class="pt-3 text-center text-secondary" th:text="${planilla.totalHorasExtra}">3.00</td>
+                                <td class="pt-3 text-right text-gray-950" 
+                                    th:text="'S/ ' + ${#numbers.formatDecimal(planilla.totalHorasBase.multiply(planilla.totalPago.divide(planilla.totalHorasBase.add(planilla.totalHorasExtra.multiply(T(java.math.BigDecimal).valueOf(1.25))), 4, T(java.math.RoundingMode).HALF_UP)), 1, 'COMMA', 2, 'POINT')}"
+                                    th:if="false">S/ 1,200.00</td> <!-- Solo de referencia -->
+                                <td class="pt-3"></td> <!-- Columna vacía para cuadrar -->
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Ajustes Extraordinarios -->
+            <div class="p-8 border-b border-gray-100 bg-gray-50/30" th:if="${!#lists.isEmpty(planilla.ajustes)}">
+                <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Ajustes y Bonificaciones Extraordinarias</h3>
+                <div class="space-y-3">
+                    <div th:each="a : ${planilla.ajustes}" class="flex items-center justify-between p-3 rounded-xl border border-gray-100 bg-white shadow-sm">
+                        <div class="flex items-center gap-3">
+                            <span th:if="${a.tipo.name() == 'ADELANTO'}" 
+                                  class="w-2.5 h-2.5 rounded-full bg-green-500 inline-block"></span>
+                            <span th:if="${a.tipo.name() == 'DESCUENTO'}" 
+                                  class="w-2.5 h-2.5 rounded-full bg-red-500 inline-block"></span>
+                            <div>
+                                <span class="text-sm font-semibold text-gray-900" th:text="${a.tipo.name()}">ADELANTO</span>
+                                <span class="block text-xs text-gray-500" th:text="${a.motivo}">Préstamo semanal</span>
+                            </div>
+                        </div>
+                        <span th:class="${a.tipo.name() == 'ADELANTO'} ? 'text-green-600 font-bold text-sm' : 'text-red-600 font-bold text-sm'"
+                              th:text="${a.tipo.name() == 'ADELANTO' ? '+ S/ ' : '- S/ '} + ${#numbers.formatDecimal(a.monto, 1, 'COMMA', 2, 'POINT')}">
+                            + S/ 100.00
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resumen Total Recibo -->
+            <div class="p-8 bg-gray-50/70 border-t border-gray-100 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-6">
+                <div>
+                    <h4 class="text-xs font-black text-gray-400 uppercase tracking-widest">Liquidación Neta</h4>
+                    <p class="text-xs text-gray-500 mt-1">El monto indicado ha sido calculado sobre las horas aprobadas por el Ingeniero de Campo y los ajustes aplicados por Oficina Técnica.</p>
+                </div>
+                <div class="text-right whitespace-nowrap bg-white border border-gray-200 px-6 py-4 rounded-2xl shadow-sm">
+                    <span class="block text-xs font-bold text-gray-400 uppercase">Neto a Recibir</span>
+                    <span class="text-3xl font-black text-primary" 
+                          th:text="'S/ ' + ${#numbers.formatDecimal(planilla.totalPago, 1, 'COMMA', 2, 'POINT')}">
+                        S/ 1,350.00
+                    </span>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div th:replace="~{fragments/footer :: footer}"></div>
+
+</body>
+</html>

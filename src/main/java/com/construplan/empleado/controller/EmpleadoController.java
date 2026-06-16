@@ -12,6 +12,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -23,6 +24,8 @@ import com.construplan.empleado.model.entity.Empleado;
 import com.construplan.empleado.service.EmpleadoService;
 import com.construplan.empleado.service.RegistroDiarioService;
 import com.construplan.empleado.service.TicketService;
+import com.construplan.oficina.model.entity.Planilla;
+import com.construplan.oficina.service.PlanillaService;
 
 @Controller
 @RequestMapping("/empleado")
@@ -40,6 +43,9 @@ public class EmpleadoController {
     
     @Autowired
     private TicketService ticketService;
+    
+    @Autowired
+    private PlanillaService planillaService;
 
     @GetMapping("/dashboard")
     public String dashboard(Authentication authentication, Model model) {
@@ -179,5 +185,76 @@ public class EmpleadoController {
         } catch (DateTimeParseException exception) {
             return null;
         }
+    }
+    
+    /**
+     * Muestra el historial completo de asistencia del empleado logueado.
+     * Soporta los alias de ruta '/registro-horas', '/horas' y '/jornada'.
+     */
+    @GetMapping({"/registro-horas", "/horas", "/jornada"})
+    public String viewRecords(Authentication authentication, Model model) {
+        String username = authentication.getName();
+        Optional<Empleado> optionalEmpleado = empleadoService.buscarOptionalPorUsername(username);
+        if (optionalEmpleado.isEmpty()) {
+            return "redirect:/empleado/perfil";
+        }
+        Empleado empleado = optionalEmpleado.get();
+        model.addAttribute("empleado", empleado);
+        model.addAttribute("active", "horas");
+        model.addAttribute("registros", registroDiarioService.obtenerUltimosRegistros(empleado.getIdEmpleado()));
+        return "empleado/registro-horas";
+    }
+
+    /**
+     * Muestra el historial completo de planillas y pagos del empleado logueado.
+     * Soporta los alias de ruta '/planillas' y '/pago'.
+     */
+    @GetMapping({"/planillas", "/pago"})
+    public String viewPayrolls(Authentication authentication, Model model) {
+        String username = authentication.getName();
+        Optional<Empleado> optionalEmpleado = empleadoService.buscarOptionalPorUsername(username);
+        if (optionalEmpleado.isEmpty()) {
+            return "redirect:/empleado/perfil";
+        }
+        Empleado empleado = optionalEmpleado.get();
+        model.addAttribute("empleado", empleado);
+        model.addAttribute("active", "pago");
+        model.addAttribute("planillas", planillaService.getPayrollsByEmployee(empleado.getIdEmpleado()));
+        return "empleado/planillas";
+    }
+
+    /**
+     * Muestra el detalle de una planilla específica (recibo de pago digital) del empleado.
+     * Incorpora una validación de seguridad (guard) para evitar el acceso a planillas ajenas.
+     */
+    @GetMapping("/planillas/{id}")
+    public String viewPayrollDetail(Authentication authentication, 
+                                    @PathVariable("id") int idPlanilla, 
+                                    Model model, 
+                                    RedirectAttributes redirectAttributes) {
+        String username = authentication.getName();
+        Optional<Empleado> optionalEmpleado = empleadoService.buscarOptionalPorUsername(username);
+        if (optionalEmpleado.isEmpty()) {
+            return "redirect:/empleado/perfil";
+        }
+        Empleado empleado = optionalEmpleado.get();
+
+        Optional<Planilla> optionalPlanilla = planillaService.getPayroll(idPlanilla);
+        if (optionalPlanilla.isEmpty()) {
+            redirectAttributes.addFlashAttribute("error", "La planilla no existe.");
+            return "redirect:/empleado/planillas";
+        }
+        Planilla planilla = optionalPlanilla.get();
+
+        // Guard de seguridad: Validar que la planilla pertenezca al empleado autenticado
+        if (planilla.getEmpleado().getIdEmpleado() != empleado.getIdEmpleado()) {
+            redirectAttributes.addFlashAttribute("error", "No tienes acceso a este recibo de pago.");
+            return "redirect:/empleado/planillas";
+        }
+
+        model.addAttribute("empleado", empleado);
+        model.addAttribute("planilla", planilla);
+        model.addAttribute("active", "pago");
+        return "empleado/planilla-detalle";
     }
 }
