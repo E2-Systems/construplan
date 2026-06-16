@@ -58,21 +58,38 @@ public class SueldoService {
         Empleado empleado = empleadoRepository.findById(idEmpleado)
                 .orElseThrow(() -> new IllegalStateException("Empleado no encontrado"));
 
-        // Buscar si existe un sueldo activo a la fecha de inicio del nuevo sueldo
-        Optional<Sueldo> sueldoActivoOpt = sueldoRepository.findSueldoActivoByEmpleadoAndFecha(idEmpleado, fechaInicio);
+        // Obtener historial ordenado de forma descendente por fecha de inicio (el último acuerdo estará primero)
+        List<Sueldo> sueldos = sueldoRepository.findByEmpleado_IdEmpleadoOrderByFechaInicioDesc(idEmpleado);
 
-        if (sueldoActivoOpt.isPresent()) {
-            Sueldo sueldoActivo = sueldoActivoOpt.get();
+        // Guard temprano: Si es el primer acuerdo del empleado, se crea con vigencia indefinida
+        if (sueldos.isEmpty()) {
+            Sueldo primerSueldo = Sueldo.builder()
+                    .empleado(empleado)
+                    .sueldo(monto)
+                    .periodo(periodo)
+                    .fechaInicio(fechaInicio)
+                    .fechaFin(null)
+                    .build();
+            return sueldoRepository.save(primerSueldo);
+        }
+
+        Sueldo ultimoSueldo = sueldos.get(0);
             
-            // Si la fecha de inicio del nuevo sueldo es menor o igual a la del activo, hay conflicto de traslape
-            if (!fechaInicio.isAfter(sueldoActivo.getFechaInicio())) {
-                throw new IllegalStateException("La fecha de inicio debe ser posterior a la fecha de inicio del sueldo activo actual (" + sueldoActivo.getFechaInicio() + ")");
+        if (fechaInicio.equals(ultimoSueldo.getFechaInicio())) {
+            ultimoSueldo.setSueldo(monto);
+            ultimoSueldo.setPeriodo(periodo);
+            return sueldoRepository.save(ultimoSueldo);
+        }
+
+        // Guard temprano: Prohibir registros con fecha anterior al último acuerdo para prevenir traslapes e inconsistencias
+        if (fechaInicio.isBefore(ultimoSueldo.getFechaInicio())) {
+            throw new IllegalStateException("La fecha de inicio de vigencia (" + fechaInicio 
+                    + ") no puede ser anterior a la del acuerdo salarial actual (" + ultimoSueldo.getFechaInicio() + ").");
             }
 
-            // Cerrar el sueldo anterior colocándole como fecha de fin el día previo al inicio del nuevo sueldo
-            sueldoActivo.setFechaFin(fechaInicio.minusDays(1));
-            sueldoRepository.save(sueldoActivo);
-        }
+        // Si la fecha es posterior, cerramos el acuerdo actual el día previo al inicio del nuevo sueldo
+        ultimoSueldo.setFechaFin(fechaInicio.minusDays(1));
+        sueldoRepository.save(ultimoSueldo);
 
         // Crear e insertar el nuevo acuerdo salarial
         Sueldo nuevoSueldo = Sueldo.builder()
@@ -84,5 +101,42 @@ public class SueldoService {
                 .build();
 
         return sueldoRepository.save(nuevoSueldo);
+    }
+    
+    /**
+     * Elimina un acuerdo salarial específico y reconstruye en cadena el historial
+     * de vigencias del empleado para no dejar huecos ni periodos solapados.
+     */
+    @Transactional
+    public int eliminarSueldo(int idSueldo) {
+        Sueldo sueldoAEliminar = sueldoRepository.findById(idSueldo)
+                .orElseThrow(() -> new IllegalArgumentException("Acuerdo salarial no encontrado con ID: " + idSueldo));
+
+        Empleado empleado = sueldoAEliminar.getEmpleado();
+        int idEmpleado = empleado.getIdEmpleado();
+        sueldoRepository.delete(sueldoAEliminar);
+
+        // Obtener los sueldos restantes ordenados de forma descendente (más recientes primero)
+        List<Sueldo> historial = sueldoRepository.findByEmpleado_IdEmpleadoOrderByFechaInicioDesc(idEmpleado);
+
+        // Guard temprano: si no quedan sueldos, no hay nada que reconstruir
+        if (historial.isEmpty()) {
+            return idEmpleado;
+        }
+
+        // Reconstrucción secuencial en cascada
+        for (int i = 0; i < historial.size(); i++) {
+            Sueldo sueldo = historial.get(i);
+            if (i == 0) {
+                // El acuerdo más reciente en la lista debe tener vigencia indefinida
+                sueldo.setFechaFin(null);
+            } else {
+                // Los acuerdos históricos intermedios terminan el día previo al inicio del sueldo que les sucede
+                Sueldo sueldoSiguiente = historial.get(i - 1);
+                sueldo.setFechaFin(sueldoSiguiente.getFechaInicio().minusDays(1));
+            }
+            sueldoRepository.save(sueldo);
+        }
+        return idEmpleado;
     }
 }

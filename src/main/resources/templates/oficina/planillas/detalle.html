@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalle de Planilla - ConstruPlan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#004E89',
+                        secondary: '#FF6B35',
+                        accent: '#FFD23F',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-gray-50 flex flex-col min-h-screen">
+
+    <!-- Navbar -->
+    <div th:replace="~{fragments/navbar :: navbar('planillas')}"></div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 w-full flex-grow">
+        <!-- Mensajes flash -->
+        <div class="mb-4" th:if="${mensaje}">
+            <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-xl shadow-sm" role="alert">
+                <span class="block sm:inline font-medium" th:text="${mensaje}"></span>
+            </div>
+        </div>
+        <div class="mb-4" th:if="${error}">
+            <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-xl shadow-sm" role="alert">
+                <span class="block sm:inline font-medium" th:text="${error}"></span>
+            </div>
+        </div>
+
+        <!-- Botón de retorno y título -->
+        <div class="flex items-center justify-between mb-6">
+            <a th:href="@{/oficina/planillas}" 
+               class="px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition text-sm font-semibold flex items-center shadow-sm">
+                ← Volver al Listado
+            </a>
+            <div th:if="${planilla.estado.name() == 'GENERADA'}" class="flex gap-2">
+                <a th:href="@{/oficina/planillas/{id}/ajustes/nuevo(id=${planilla.idPlanilla})}"
+                   class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition text-sm font-semibold shadow flex items-center gap-1.5">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Agregar Ajuste
+                </a>
+                <form th:action="@{/oficina/planillas/detalle/{id}/pagar(id=${planilla.idPlanilla})}" method="post" 
+                      onsubmit="return confirm('¿Está seguro de que desea marcar esta planilla como PAGADA? Esta acción no se puede deshacer.');">
+                    <button type="submit" 
+                            class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition text-sm font-semibold shadow flex items-center gap-1.5">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Marcar como Pagada
+                    </button>
+                </form>
+				<form th:action="@{/oficina/planillas/detalle/{id}/eliminar(id=${planilla.idPlanilla})}" method="post" 
+				                     onsubmit="return confirm('¿Está seguro de que desea eliminar esta planilla de forma definitiva? Se borrarán todos los detalles de horas y ajustes asociados.');">
+				                   <button type="submit" 
+				                           class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition text-sm font-semibold shadow flex items-center gap-1.5">
+				                       <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+				                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+				                       </svg>
+				                       Eliminar Planilla
+				                   </button>
+				               </form>
+            </div>
+        </div>
+
+        <!-- Grid Principal -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+            
+            <!-- Panel Izquierdo: Resumen y Datos del Empleado -->
+            <div class="space-y-6">
+                <!-- Tarjeta del Empleado -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-4">Información del Empleado</h3>
+                    <div class="flex items-center space-x-4 mb-4">
+                        <div class="h-14 w-14 bg-blue-100 text-primary font-black rounded-2xl flex items-center justify-center border border-blue-200 text-lg shadow-sm">
+                            <span th:text="${#strings.substring(planilla.empleado.nombres, 0, 1) + #strings.substring(planilla.empleado.apellidos, 0, 1)}">EP</span>
+                        </div>
+                        <div>
+                            <h4 class="text-base font-bold text-gray-900" th:text="${planilla.empleado.nombreCompleto}">Juan Pérez</h4>
+                            <p class="text-xs text-gray-500" th:text="${'DNI: ' + planilla.empleado.dni}">DNI: 00000000</p>
+                            <p class="text-xs text-gray-500" th:text="${'Categoría: ' + (planilla.empleado.categoria != null ? planilla.empleado.categoria : 'No asignada')}">Operario</p>
+                        </div>
+                    </div>
+                    
+                    <div class="border-t border-gray-100 pt-4 space-y-2.5">
+                        <div class="flex justify-between text-xs">
+                            <span class="text-gray-500 font-medium">Periodo liquidado:</span>
+                            <span class="text-gray-900 font-bold" th:text="${#temporals.format(planilla.fechaInicio, 'dd/MM/yyyy') + ' - ' + #temporals.format(planilla.fechaFin, 'dd/MM/yyyy')}">01/01/2026 - 06/01/2026</span>
+                        </div>
+                        <div class="flex justify-between text-xs">
+                            <span class="text-gray-500 font-medium">Estado administrativo:</span>
+                            <span th:if="${planilla.estado.name() == 'GENERADA'}" 
+                                  class="px-2 py-0.5 inline-flex text-[10px] leading-5 font-bold rounded-full bg-amber-100 text-amber-800 border border-amber-200">
+                                GENERADA
+                            </span>
+                            <span th:if="${planilla.estado.name() == 'PAGADA'}" 
+                                  class="px-2 py-0.5 inline-flex text-[10px] leading-5 font-bold rounded-full bg-green-100 text-green-800 border border-green-200">
+                                PAGADA
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tarjeta del Neto Final -->
+                <div class="bg-gradient-to-br from-primary to-blue-900 rounded-2xl shadow-md p-6 text-white">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-blue-200 mb-4">Cómputo de Remuneración</h3>
+                    
+                    <!-- Horas totales -->
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <div class="bg-white/10 rounded-xl p-3 border border-white/5">
+                            <span class="block text-[10px] uppercase font-bold text-blue-200">Horas Base</span>
+                            <span class="text-xl font-bold" th:text="${planilla.totalHorasBase}">48.00</span>
+                        </div>
+                        <div class="bg-white/10 rounded-xl p-3 border border-white/5">
+                            <span class="block text-[10px] uppercase font-bold text-blue-200">Horas Extra</span>
+                            <span class="text-xl font-bold" th:text="${planilla.totalHorasExtra}">2.50</span>
+                        </div>
+                    </div>
+
+                    <!-- Detalle del neto -->
+                    <div class="border-t border-white/15 pt-4 space-y-2">
+                        <div class="flex justify-between text-xs">
+                            <span class="text-blue-100">Subtotal (Horas):</span>
+                            <span th:text="'S/ ' + ${#numbers.formatDecimal(planilla.totalPago, 1, 'COMMA', 2, 'POINT')}">S/ 1,200.00</span>
+                        </div>
+                        <div class="flex justify-between text-xs text-red-200" th:if="${not #lists.isEmpty(planilla.ajustes)}">
+                            <span>Ajustes (-)</span>
+                            <span>
+                                <th:block th:with="sumaAjustes=${#aggregates.sum(planilla.ajustes.![monto])}">
+                                    <span th:text="'-S/ ' + ${#numbers.formatDecimal(sumaAjustes, 1, 'COMMA', 2, 'POINT')}"></span>
+                                </th:block>
+                            </span>
+                        </div>
+                        <div class="flex justify-between items-end border-t border-white/20 pt-3 mt-2">
+                            <span class="text-sm font-bold text-white">Neto a Recibir:</span>
+                            <span class="text-3xl font-black text-accent" 
+                                  th:text="'S/ ' + ${#numbers.formatDecimal(planilla.totalPago, 1, 'COMMA', 2, 'POINT')}">
+                                S/ 1,200.00
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panel Derecho: Tablas de detalles diarios y ajustes -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Desglose de Horas y Pago Diario -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-100">
+                        <h3 class="text-sm font-bold text-gray-900">Desglose de Trabajo Diario</h3>
+                        <p class="text-xs text-gray-500 mt-0.5">Listado de asistencias de lunes a sábado aprobadas por supervisión.</p>
+                    </div>
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50/50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase">Fecha</th>
+                                <th class="px-6 py-3 text-center text-xs font-bold text-gray-500 uppercase">Horas Base</th>
+                                <th class="px-6 py-3 text-center text-xs font-bold text-gray-500 uppercase">Horas Extra (1.25x)</th>
+                                <th class="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase">Monto Diario</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            <tr th:each="det : ${planilla.detalles}" class="hover:bg-gray-50/30 transition">
+                                <td class="px-6 py-3.5 whitespace-nowrap text-sm font-bold text-gray-700" 
+                                    th:text="${#temporals.format(det.fecha, 'EEEE dd/MM/yyyy')}">Lunes 01/01</td>
+                                <td class="px-6 py-3.5 whitespace-nowrap text-center text-sm font-semibold text-gray-800" 
+                                    th:text="${det.horasBase}">8.5</td>
+                                <td class="px-6 py-3.5 whitespace-nowrap text-center text-sm font-semibold text-gray-800">
+                                    <span th:if="${det.horasExtra.compareTo(T(java.math.BigDecimal).ZERO) > 0}" 
+                                          class="text-secondary font-bold" 
+                                          th:text="${det.horasExtra}">2.0</span>
+                                    <span th:unless="${det.horasExtra.compareTo(T(java.math.BigDecimal).ZERO) > 0}" 
+                                          class="text-gray-400 font-normal">—</span>
+                                </td>
+                                <td class="px-6 py-3.5 whitespace-nowrap text-right text-sm font-bold text-gray-950" 
+                                    th:text="'S/ ' + ${#numbers.formatDecimal(det.pagoDia, 1, 'COMMA', 2, 'POINT')}">S/ 120.00</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Adelantos y Descuentos Extraordinarios -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-100 flex items-center justify-between">
+                        <div>
+                            <h3 class="text-sm font-bold text-gray-900">Adelantos y Descuentos</h3>
+                            <p class="text-xs text-gray-500 mt-0.5">Deducciones extraordinarias registradas para este periodo.</p>
+                        </div>
+                    </div>
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50/50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase">Tipo</th>
+                                <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase">Motivo</th>
+                                <th class="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase">Monto</th>
+                                <th class="px-6 py-3 text-center text-xs font-bold text-gray-500 uppercase" th:if="${planilla.estado.name() == 'GENERADA'}">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            <tr th:each="ajuste : ${planilla.ajustes}" class="hover:bg-gray-50/30 transition">
+                                <td class="px-6 py-3.5 whitespace-nowrap">
+                                    <span th:if="${ajuste.tipo.name() == 'ADELANTO'}" 
+                                          class="px-2.5 py-1 text-[10px] leading-5 font-bold rounded-lg bg-orange-100 text-orange-800 border border-orange-200">
+                                        ADELANTO
+                                    </span>
+                                    <span th:if="${ajuste.tipo.name() == 'DESCUENTO'}" 
+                                          class="px-2.5 py-1 text-[10px] leading-5 font-bold rounded-lg bg-rose-100 text-rose-800 border border-rose-200">
+                                        DESCUENTO
+                                    </span>
+                                </td>
+                                <td class="px-6 py-3.5 text-sm text-gray-600 font-medium" th:text="${ajuste.motivo}">
+                                    Préstamo extraordinaria
+                                </td>
+                                <td class="px-6 py-3.5 whitespace-nowrap text-right text-sm font-bold text-gray-900" 
+                                    th:text="'-S/ ' + ${#numbers.formatDecimal(ajuste.monto, 1, 'COMMA', 2, 'POINT')}">
+                                    -S/ 100.00
+                                </td>
+                                <td class="px-6 py-3.5 whitespace-nowrap text-center" th:if="${planilla.estado.name() == 'GENERADA'}">
+                                    <form th:action="@{/oficina/ajustes/{id}/eliminar(id=${ajuste.idAjuste})}" method="post"
+                                          onsubmit="return confirm('¿Está seguro de que desea eliminar este ajuste?');">
+                                        <button type="submit" 
+                                                class="text-red-600 hover:text-white border border-red-200 hover:bg-red-600 px-3 py-1 rounded-lg transition duration-150 text-xs font-bold">
+                                            Eliminar
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(planilla.ajustes)}">
+                                <td colspan="4" class="px-6 py-8 text-center text-sm text-gray-400 italic">
+                                    No se registran adelantos ni descuentos extraordinarios en esta planilla.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div th:replace="~{fragments/footer :: footer}"></div>
+
+</body>
+
+</html>

@@ -139,7 +139,8 @@
                                 <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Vigente Desde</th>
                                 <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Vigente Hasta</th>
                                 <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Estado</th>
-                            </tr>
+								<th class="px-6 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Acciones</th>
+								 </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-100 text-sm">
                             <tr th:each="suel : ${historialSueldos}" class="hover:bg-gray-50 transition">
@@ -161,9 +162,19 @@
                                         Histórico
                                     </span>
                                 </td>
+								<td class="px-6 py-4 whitespace-nowrap text-center">
+								                                    <form th:action="@{/oficina/empleados/sueldos/eliminar/{id}(id=${suel.idSueldo})}" method="post"
+								                                          onsubmit="return confirm('¿Está seguro de que desea eliminar este acuerdo salarial? Se recalculará la línea de tiempo salarial de vigencias.');"
+								                                          class="inline-block">
+								                                        <button type="submit" 
+								                                                class="text-red-600 hover:text-white border border-red-200 hover:bg-red-600 px-3 py-1.5 rounded-md transition duration-150 text-xs font-bold bg-red-50">
+								                                            Eliminar
+								                                        </button>
+								                                    </form>
+								                                </td>
                             </tr>
                             <tr th:if="${#lists.isEmpty(historialSueldos)}">
-                                <td colspan="5" class="px-6 py-8 text-center text-gray-500 italic">
+                                <td colspan="6" class="px-6 py-8 text-center text-gray-500 italic">
                                     Este empleado aún no tiene acuerdos salariales registrados.
                                 </td>
                             </tr>

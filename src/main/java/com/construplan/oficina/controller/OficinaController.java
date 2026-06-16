@@ -26,8 +26,11 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.construplan.empleado.model.entity.Categoria;
 import com.construplan.empleado.model.entity.Empleado;
 import com.construplan.empleado.service.EmpleadoService;
+import com.construplan.oficina.model.entity.EstadoPlanilla;
 import com.construplan.oficina.model.entity.PeriodoPago;
 import com.construplan.oficina.model.entity.Sueldo;
+import com.construplan.oficina.repository.AjustePlanillaRepository;
+import com.construplan.oficina.repository.PlanillaRepository;
 import com.construplan.oficina.service.SueldoService;
 
 // La verificación de sesión y rol la gestiona Spring Security en SecurityConfig (/oficina/** → ROLE_OFICINA)
@@ -41,6 +44,12 @@ public class OficinaController {
 	    @Autowired
 	    private SueldoService sueldoService;
 	    
+	    @Autowired
+	    private PlanillaRepository planillaRepository;
+
+	    @Autowired
+	    private AjustePlanillaRepository ajustePlanillaRepository;
+	    
     @GetMapping("/dashboard")
     public String dashboard(Model model) {
 
@@ -53,11 +62,12 @@ public class OficinaController {
         // Hora actual formateada para mostrar en el encabezado
         String horaActual = LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm"));
 
-        // Datos estadísticos estáticos — se reemplazarán por consultas reales al implementar el módulo de planillas
-        int planillasGeneradas = 8;
-        int planillasPendientes = 3;
-        int empleadosActivos = 45;
-        double totalPorPagar = 38500.50;
+     // Datos estadísticos calculados dinámicamente
+        long planillasGeneradas = planillaRepository.count();
+        long planillasPendientes = planillaRepository.countByEstado(EstadoPlanilla.GENERADA);
+        int empleadosActivos = empleadoService.listarActivos().size();
+        BigDecimal totalPorPagarBigDecimal = planillaRepository.sumTotalPagoByEstado(EstadoPlanilla.GENERADA);
+        double totalPorPagar = totalPorPagarBigDecimal != null ? totalPorPagarBigDecimal.doubleValue() : 0.0;
 
         // Rango de la semana laboral actual (lunes a sábado)
         LocalDate inicioSemana = hoy.with(DayOfWeek.MONDAY);
@@ -65,8 +75,8 @@ public class OficinaController {
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         String semanaActual = inicioSemana.format(dateFormatter) + " - " + finSemana.format(dateFormatter);
 
-        // Contadores de alertas pendientes
-        int ajustesPendientes = 2;
+     // Contadores de alertas pendientes reales
+        long ajustesPendientes = ajustePlanillaRepository.countByPlanilla_Estado(EstadoPlanilla.GENERADA);
         int ticketsPendientes = 5;
 
         // Se inyectan todos los atributos al modelo para que Thymeleaf los renderice en la vista
@@ -135,5 +145,18 @@ public class OficinaController {
         }
 
         return "redirect:/oficina/empleados";
+    }
+    
+
+    @PostMapping("/empleados/sueldos/eliminar/{id}")
+    public String deleteSalaryAgreement(@PathVariable("id") int idSueldo, RedirectAttributes redirectAttributes) {
+        try {
+            int idEmployee = sueldoService.eliminarSueldo(idSueldo);
+            redirectAttributes.addFlashAttribute("mensaje", "El acuerdo salarial ha sido eliminado de forma definitiva y el historial de vigencias ha sido recalculado.");
+            return "redirect:/oficina/empleados/gestionar/" + idEmployee;
+        } catch (Exception exception) {
+            redirectAttributes.addFlashAttribute("error", "Error al intentar eliminar el acuerdo salarial: " + exception.getMessage());
+            return "redirect:/oficina/empleados";
+        }
     }
 }

@@ -44,4 +44,15 @@ public interface RegistroDiarioRepository extends JpaRepository<RegistroDiario, 
     // Conteo rápido por estado para el dashboard
     @Query("SELECT COUNT(r) FROM RegistroDiario r WHERE r.estado = :estado")
     long countByEstado(@Param("estado") EstadoRegistro estado);
+    
+ // Registros aprobados individuales por empleado y rango de fechas, para generar detalles diarios de planilla
+    @Query("SELECT r FROM RegistroDiario r JOIN FETCH r.asignacion " +
+           "WHERE r.asignacion.empleado.idEmpleado = :idEmpleado " +
+           "AND r.asignacion.fecha BETWEEN :inicio AND :fin " +
+           "AND r.estado = 'APROBADO' " +
+           "ORDER BY r.asignacion.fecha")
+    List<RegistroDiario> findAprobadosByEmpleadoAndRango(
+            @Param("idEmpleado") int idEmpleado,
+            @Param("inicio") LocalDate inicio,
+            @Param("fin") LocalDate fin);
 }

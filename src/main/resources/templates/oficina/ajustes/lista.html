@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historial de Ajustes - ConstruPlan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#004E89',
+                        secondary: '#FF6B35',
+                        accent: '#FFD23F',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-gray-50 flex flex-col min-h-screen">
+
+    <!-- Navbar -->
+    <div th:replace="~{fragments/navbar :: navbar('ajustes')}"></div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 w-full flex-grow">
+        <!-- Mensajes flash -->
+        <div class="mb-4" th:if="${mensaje}">
+            <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-xl shadow-sm" role="alert">
+                <span class="block sm:inline font-medium" th:text="${mensaje}"></span>
+            </div>
+        </div>
+        <div class="mb-4" th:if="${error}">
+            <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-xl shadow-sm" role="alert">
+                <span class="block sm:inline font-medium" th:text="${error}"></span>
+            </div>
+        </div>
+
+        <!-- Encabezado -->
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Historial de Ajustes Extraordinarios</h1>
+                <p class="text-sm text-gray-600 mt-1">
+                    Auditoría de todos los adelantos de sueldo y deducciones extraordinarias aplicadas sobre las planillas.
+                </p>
+            </div>
+            <div class="mt-4 md:mt-0">
+                <a th:href="@{/oficina/dashboard}"
+                    class="px-4 py-2.5 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition text-sm font-semibold flex items-center shadow-sm">
+                    ← Volver al Dashboard
+                </a>
+            </div>
+        </div>
+
+        <!-- Tabla de Ajustes -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden mb-8">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Empleado</th>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Planilla / Periodo</th>
+                            <th class="px-6 py-4 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">Tipo</th>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Motivo</th>
+                            <th class="px-6 py-4 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Monto</th>
+                            <th class="px-6 py-4 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-100">
+                        <tr th:each="ajuste : ${ajustes}" class="hover:bg-gray-50/50 transition duration-150">
+                            <!-- Empleado -->
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0 h-10 w-10 bg-blue-50 text-primary font-bold rounded-xl flex items-center justify-center border border-blue-100 shadow-sm">
+                                        <span th:text="${#strings.substring(ajuste.planilla.empleado.nombres, 0, 1) + #strings.substring(ajuste.planilla.empleado.apellidos, 0, 1)}">EP</span>
+                                    </div>
+                                    <div class="ml-4">
+                                        <div class="text-sm font-semibold text-gray-900" th:text="${ajuste.planilla.empleado.nombreCompleto}">Juan Pérez</div>
+                                        <div class="text-xs text-gray-500" th:text="${'DNI: ' + ajuste.planilla.empleado.dni}">DNI</div>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <!-- Planilla / Periodo -->
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-xs text-gray-700 font-semibold" th:text="${'Planilla #' + ajuste.planilla.idPlanilla}">#1</div>
+                                <div class="text-[10px] text-gray-400 font-normal" th:text="${#temporals.format(ajuste.planilla.fechaInicio, 'dd/MM/yyyy') + ' - ' + #temporals.format(ajuste.planilla.fechaFin, 'dd/MM/yyyy')}">Periodo</div>
+                            </td>
+
+                            <!-- Tipo -->
+                            <td class="px-6 py-4 whitespace-nowrap text-center">
+                                <span th:if="${ajuste.tipo.name() == 'ADELANTO'}" 
+                                      class="px-2.5 py-1 text-[10px] leading-5 font-bold rounded-lg bg-orange-100 text-orange-800 border border-orange-200">
+                                    ADELANTO
+                                </span>
+                                <span th:if="${ajuste.tipo.name() == 'DESCUENTO'}" 
+                                      class="px-2.5 py-1 text-[10px] leading-5 font-bold rounded-lg bg-rose-100 text-rose-800 border border-rose-200">
+                                    DESCUENTO
+                                </span>
+                            </td>
+
+                            <!-- Motivo -->
+                            <td class="px-6 py-4 text-sm text-gray-600 font-medium max-w-xs truncate" th:text="${ajuste.motivo}">
+                                Motivo descriptivo del ajuste.
+                            </td>
+
+                            <!-- Monto -->
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-bold text-gray-900" 
+                                th:text="'-S/ ' + ${#numbers.formatDecimal(ajuste.monto, 1, 'COMMA', 2, 'POINT')}">
+                                -S/ 100.00
+                            </td>
+
+                            <!-- Acciones -->
+                            <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
+                                <a th:href="@{/oficina/planillas/detalle/{id}(id=${ajuste.planilla.idPlanilla})}"
+                                   class="text-primary hover:underline font-semibold text-xs">
+                                    Ir a Planilla
+                                </a>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(ajustes)}">
+                            <td colspan="6" class="px-6 py-12 text-center text-sm text-gray-500">
+                                <div class="flex flex-col items-center justify-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-300 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <span class="font-medium text-gray-600 block">No se encontraron ajustes extraordinarios</span>
+                                    <span class="text-xs text-gray-400 mt-1">Los ajustes se agregan individualmente desde el detalle de la planilla de cada empleado.</span>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div th:replace="~{fragments/footer :: footer}"></div>
+
+</body>
+
+</html>
