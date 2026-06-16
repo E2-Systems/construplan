@@ -75,8 +75,8 @@ public class RegistroDiarioService {
 
         // Cálculo de horas trabajadas base (límite de 8 horas) y extras
         double totalHoras = registro.getHorasTrabajadas();
-        double base = Math.min(totalHoras, 8.0);
-        double extra = Math.max(0.0, totalHoras - 8.0);
+        double base = Math.min(totalHoras, 8.5);
+        double extra = Math.max(0.0, totalHoras - 8.5);
 
         registro.setHorasBase(BigDecimal.valueOf(base));
         registro.setHorasExtra(BigDecimal.valueOf(extra));

@@ -288,22 +288,20 @@ public class PlanillaService {
      * Recalcula el total de pago neto de la planilla a partir de los detalles diarios y los ajustes registrados.
      */
     private void recalculateTotal(Planilla payroll) {
-        BigDecimal baseSum = payroll.getDetalles().stream()
+        BigDecimal finalTotal = payroll.getDetalles().stream()
                 .map(PlanillaDetalle::getPagoDia)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        BigDecimal adjustmentsSum = BigDecimal.ZERO;
         for (AjustePlanilla adjustment : payroll.getAjustes()) {
             if (adjustment.getTipo() == TipoAjuste.ADELANTO) {
-                // Adelantos restan al pago neto a recibir al final de la semana
-                adjustmentsSum = adjustmentsSum.add(adjustment.getMonto());
+                // Adelantos suman al pago final de la planilla de forma extraordinaria
+                finalTotal = finalTotal.add(adjustment.getMonto());
             } else if (adjustment.getTipo() == TipoAjuste.DESCUENTO) {
-                // Descuentos extraordinarios restan al pago neto a recibir
-                adjustmentsSum = adjustmentsSum.add(adjustment.getMonto());
+                // Descuentos extraordinarios restan al pago final de la planilla
+                finalTotal = finalTotal.subtract(adjustment.getMonto());
             }
         }
 
-        BigDecimal finalTotal = baseSum.subtract(adjustmentsSum);
         // Garantizar que la planilla no resulte con un saldo neto negativo para el empleado
         if (finalTotal.compareTo(BigDecimal.ZERO) < 0) {
             finalTotal = BigDecimal.ZERO;
@@ -311,6 +309,7 @@ public class PlanillaService {
 
         payroll.setTotalPago(finalTotal.setScale(2, RoundingMode.HALF_UP));
     }
+
 
     /**
      * Calcula el sueldo diario equivalente según el periodo de pago acordado en el contrato del empleado.
