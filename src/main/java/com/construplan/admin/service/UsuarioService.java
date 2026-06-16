@@ -105,7 +105,15 @@ public class UsuarioService {
 	     return true;
 	 }
 	 
-		 
+	 /**
+	  * Retorna la lista de usuarios con rol EMPLEADO que no están asignados a ningún perfil de empleado.
+	  */
+	 public List<Usuario> obtenerUsuariosEmpleadoSinAsociar() {
+	     return usuarioRepository.findByRol(com.construplan.model.entity.Rol.EMPLEADO)
+	             .stream()
+	             .filter(u -> u.getEmpleado() == null)
+	             .toList();
+	 }
     //boolean validarCredenciales(String username, String password); --Innecesario, Spring Security lo hace
   
 

@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- El título de la pestaña cambia dinámicamente según la acción -->
+    <title th:text="${action == 'update' ? 'Editar' : 'Nuevo'} + ' Empleado - ConstruPlan'"></title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        /* Paleta de colores ConstruPlan extendida para Tailwind */
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#004E89',
+                        secondary: '#FF6B35',
+                        accent: '#FFD23F',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50">
+    <!-- Navbar principal con resaltado de la sección Empleados -->
+    <div th:replace="~{fragments/navbar :: navbar('empleados')}"></div>
+
+    <!-- Contenido principal estructurado con variable local isEdit -->
+    <div class="max-w-4xl mx-auto py-6 sm:px-6 lg:px-8" th:with="isEdit=${action == 'update'}">
+        <!-- Breadcrumb para mejorar la navegación jerárquica -->
+        <div class="px-4 mb-6">
+            <nav class="flex" aria-label="Breadcrumb">
+                <ol class="flex items-center space-x-2">
+                    <li>
+                        <a th:href="@{/admin/dashboard}" class="text-gray-500 hover:text-gray-700">
+                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/>
+                            </svg>
+                        </a>
+                    </li>
+                    <li class="flex items-center">
+                        <svg class="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+                        </svg>
+                        <a th:href="@{/admin/empleados}" class="ml-2 text-gray-500 hover:text-gray-700">
+                            Empleados
+                        </a>
+                    </li>
+                    <li class="flex items-center">
+                        <svg class="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+                        </svg>
+                        <span class="ml-2 text-gray-700 font-medium" th:text="${isEdit ? 'Editar' : 'Nuevo'}"></span>
+                    </li>
+                </ol>
+            </nav>
+        </div>
+
+        <!-- Encabezado de la página -->
+        <div class="px-4 mb-6">
+            <h1 class="text-3xl font-bold text-gray-900" th:text="${isEdit ? 'Editar Empleado' : 'Nuevo Empleado'}"></h1>
+            <p class="mt-2 text-sm text-gray-600" th:text="${isEdit ? 'Modifica la información del perfil del empleado' : 'Completa el formulario para registrar un nuevo empleado en obra'}"></p>
+        </div>
+
+        <!-- Alertas de errores del sistema -->
+        <div th:if="${error}" class="px-4 mb-6">
+            <div class="bg-red-50 border-l-4 border-red-400 p-4 rounded shadow-sm">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm text-red-700" th:text="${error}"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Formulario principal de Empleado -->
+        <div class="px-4">
+            <form th:action="@{/admin/empleados}" 
+                  method="post" 
+                  id="employeeForm" 
+                  th:object="${empleado}"
+                  class="bg-white shadow rounded-lg p-6">
+                
+                <!-- ID de empleado oculto (solo edición) -->
+                <input type="hidden" th:if="${isEdit}" th:field="*{idEmpleado}">
+
+                <div class="space-y-6">
+                    <!-- Sección: Datos Personales -->
+                    <div>
+                        <h2 class="text-lg font-medium text-gray-900 border-b pb-2 mb-4">Datos Personales</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Nombres -->
+                            <div>
+                                <label for="nombres" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Nombres <span class="text-red-500">*</span>
+                                </label>
+                                <input type="text" id="nombres" th:field="*{nombres}" required
+                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition"
+                                       placeholder="Ingrese nombres del empleado">
+                            </div>
+
+                            <!-- Apellidos -->
+                            <div>
+                                <label for="apellidos" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Apellidos <span class="text-red-500">*</span>
+                                </label>
+                                <input type="text" id="apellidos" th:field="*{apellidos}" required
+                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition"
+                                       placeholder="Ingrese apellidos del empleado">
+                            </div>
+
+                            <!-- DNI -->
+                            <div>
+                                <label for="dni" class="block text-sm font-medium text-gray-700 mb-2">
+                                    DNI (8 dígitos) <span class="text-red-500">*</span>
+                                </label>
+                                <input type="text" id="dni" th:field="*{dni}" required pattern="[0-9]{8}" maxlength="8"
+                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition"
+                                       placeholder="Ingrese DNI">
+                                <p class="mt-1 text-xs text-gray-500">Debe contener exactamente 8 números</p>
+                            </div>
+
+                            <!-- Fecha de Nacimiento -->
+                            <div>
+                                <label for="fechaNacimiento" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Fecha de Nacimiento
+                                </label>
+                                <input type="date" id="fechaNacimiento" th:field="*{fechaNacimiento}"
+                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sección: Datos de Contacto y Ubicación -->
+                    <div>
+                        <h2 class="text-lg font-medium text-gray-900 border-b pb-2 mb-4">Contacto y Residencia</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Teléfono -->
+                            <div>
+                                <label for="telefono" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Teléfono
+                                </label>
+                                <input type="text" id="telefono" th:field="*{telefono}"
+                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition"
+                                       placeholder="Ingrese número de contacto">
+                            </div>
+
+                            <!-- Dirección -->
+                            <div>
+                                <label for="direccion" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Dirección Residencial
+                                </label>
+                                <input type="text" id="direccion" th:field="*{direccion}"
+                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition"
+                                       placeholder="Dirección del domicilio">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sección: Datos del Puesto y Pago -->
+                    <div>
+                        <h2 class="text-lg font-medium text-gray-900 border-b pb-2 mb-4">Información Laboral y Financiera</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <!-- Categoría -->
+                            <div>
+                                <label for="categoria" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Categoría de Obra <span class="text-red-500">*</span>
+                                </label>
+                                <select id="categoria" th:field="*{categoria}" required
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition">
+                                    <option value="">Seleccione...</option>
+                                    <option th:each="cat : ${categorias}" th:value="${cat}" th:text="${cat.name()}"></option>
+                                </select>
+                            </div>
+
+                            <!-- Banco -->
+                            <div>
+                                <label for="banco" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Entidad Bancaria
+                                </label>
+                                <input type="text" id="banco" th:field="*{banco}"
+                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition"
+                                       placeholder="Banco para depósitos">
+                            </div>
+
+                            <!-- Cuenta Bancaria -->
+                            <div>
+                                <label for="cuentaBancaria" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Cuenta Bancaria / CCI
+                                </label>
+                                <input type="text" id="cuentaBancaria" th:field="*{cuentaBancaria}"
+                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition"
+                                       placeholder="Número de cuenta">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sección: Vinculación de Acceso al Sistema (Usuario) -->
+                    <div>
+                        <h2 class="text-lg font-medium text-gray-900 border-b pb-2 mb-4">Acceso al Sistema</h2>
+                        <div>
+                            <label for="usuario" class="block text-sm font-medium text-gray-700 mb-2">
+                                Usuario Asignado (Rol EMPLEADO)
+                            </label>
+                            <select id="usuario" th:field="*{usuario}"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition">
+                                <option value="">--- Sin acceso al sistema ---</option>
+                                <option th:each="usr : ${usuariosDisponibles}" th:value="${usr.id}" th:text="${usr.username}"></option>
+                            </select>
+                            <p class="mt-2 text-xs text-gray-500">
+                                Permite al empleado iniciar sesión con el usuario seleccionado para registrar asistencia y descargar planillas.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botones de Acción -->
+                <div class="mt-8 flex items-center justify-end space-x-4">
+                    <a th:href="@{/admin/empleados}" 
+                       class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition font-medium">
+                        Cancelar
+                    </a>
+                    <button type="submit" 
+                            class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-blue-800 transition font-medium flex items-center">
+                        <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path th:if="${isEdit}" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            <path th:unless="${isEdit}" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                        </svg>
+                        <span th:text="${isEdit ? 'Actualizar Empleado' : 'Crear Empleado'}"></span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Pie de página general -->
+    <div th:replace="~{fragments/footer :: footer}"></div>
+
+    <!-- Validaciones del lado del cliente -->
+    <script>
+        document.getElementById('employeeForm').addEventListener('submit', function(e) {
+            const nombres = document.getElementById('nombres').value.trim();
+            const apellidos = document.getElementById('apellidos').value.trim();
+            const dni = document.getElementById('dni').value.trim();
+            const categoria = document.getElementById('categoria').value;
+
+            if (nombres.length === 0) {
+                e.preventDefault();
+                alert('El nombre es requerido.');
+                document.getElementById('nombres').focus();
+                return false;
+            }
+
+            if (apellidos.length === 0) {
+                e.preventDefault();
+                alert('El apellido es requerido.');
+                document.getElementById('apellidos').focus();
+                return false;
+            }
+
+            const dniRegex = /^[0-9]{8}$/;
+            if (!dniRegex.test(dni)) {
+                e.preventDefault();
+                alert('El DNI debe contener exactamente 8 números.');
+                document.getElementById('dni').focus();
+                return false;
+            }
+
+            if (!categoria) {
+                e.preventDefault();
+                alert('Debe seleccionar una categoría de obra.');
+                document.getElementById('categoria').focus();
+                return false;
+            }
+
+            // Validar edad en caso se haya provisto una fecha de nacimiento (mínimo 18 años)
+            const birthdateValue = document.getElementById('fechaNacimiento').value;
+            if (birthdateValue) {
+                const birthdate = new Date(birthdateValue);
+                const today = new Date();
+                let age = today.getFullYear() - birthdate.getFullYear();
+                const monthDiff = today.getMonth() - birthdate.getMonth();
+                if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthdate.getDate())) {
+                    age--;
+                }
+                if (age < 18) {
+                    e.preventDefault();
+                    alert('El empleado debe ser mayor de edad (mínimo 18 años).');
+                    document.getElementById('fechaNacimiento').focus();
+                    return false;
+                }
+            }
+
+            return true;
+        });
+
+        // Filtrado reactivo en caliente de DNI
+        document.getElementById('dni').addEventListener('input', function() {
+            this.value = this.value.replace(/[^0-9]/g, '');
+        });
+    </script>
+</body>
+</html>

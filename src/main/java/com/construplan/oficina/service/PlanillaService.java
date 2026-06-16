@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.construplan.admin.service.SystemConfigurationService;
 import com.construplan.empleado.model.entity.Empleado;
 import com.construplan.empleado.model.entity.RegistroDiario;
 import com.construplan.empleado.repository.EmpleadoRepository;
@@ -50,6 +51,9 @@ public class PlanillaService {
 
     @Autowired
     private RegistroDiarioRepository registroDiarioRepository;
+    
+    @Autowired
+    private SystemConfigurationService systemConfigurationService;
 
     /**
      * Genera la planilla de un empleado para una semana determinada.
@@ -112,16 +116,18 @@ public class PlanillaService {
 
             log.info("Sueldo activo encontrado: {}", activeSalary);
 
-            BigDecimal dailyRate = calculateDailyRate(activeSalary);
-            BigDecimal hourlyRate = dailyRate.divide(BigDecimal.valueOf(8.5), 4, RoundingMode.HALF_UP);
+            BigDecimal dailyRate = calculateDailyRate(activeSalary); 
+            // La jornada estándar de trabajo diario normal se lee dinámicamente de la configuración.
+            BigDecimal hourlyRate = dailyRate.divide(systemConfigurationService.getJornadaEstandar(), 4, RoundingMode.HALF_UP);
 
             BigDecimal baseHours = record.getHorasBase() != null ? record.getHorasBase() : BigDecimal.ZERO;
             BigDecimal extraHours = record.getHorasExtra() != null ? record.getHorasExtra() : BigDecimal.ZERO;
 
             log.info("Horas base={}, horas extra={}", baseHours, extraHours);
 
-            BigDecimal basePayment = baseHours.multiply(hourlyRate);
-            BigDecimal extraPayment = extraHours.multiply(hourlyRate).multiply(BigDecimal.valueOf(1.25));
+            BigDecimal basePayment = baseHours.multiply(hourlyRate);         
+            // El factor de recargo para el pago de horas extra se lee dinámicamente de la configuración.
+            BigDecimal extraPayment = extraHours.multiply(hourlyRate).multiply(systemConfigurationService.getMultiplicadorHorasExtras());
             BigDecimal totalDailyPayment = basePayment.add(extraPayment);
 
             log.info("Pago diario calculado: {}", totalDailyPayment);
@@ -320,11 +326,11 @@ public class PlanillaService {
         BigDecimal amount = salary.getSueldo();
 
         // El usuario indicó dividir entre 6 si es periodo SEMANAL. Si es MENSUAL, se mantiene el divisor estándar de 30 días.
-        if (period == PeriodoPago.SEMANAL) {
-            return amount.divide(BigDecimal.valueOf(6), 4, RoundingMode.HALF_UP);
+        if (period == PeriodoPago.SEMANAL) {      
+            return amount.divide(systemConfigurationService.getDivisorSemanal(), 4, RoundingMode.HALF_UP);
         }
-        if (period == PeriodoPago.MENSUAL) {
-            return amount.divide(BigDecimal.valueOf(30), 4, RoundingMode.HALF_UP);
+        if (period == PeriodoPago.MENSUAL) {       
+            return amount.divide(systemConfigurationService.getDivisorMensual(), 4, RoundingMode.HALF_UP);
         }
         return amount; // DIARIO
     }

@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.construplan.admin.service.SystemConfigurationService;
 import com.construplan.campo.model.entity.AsignacionTarea;
 import com.construplan.campo.repository.AsignacionTareaRepository;
 import com.construplan.empleado.model.entity.EstadoRegistro;
@@ -25,6 +26,9 @@ public class RegistroDiarioService {
 
     @Autowired
     private AsignacionTareaRepository asignacionTareaRepository;
+
+    @Autowired
+    private SystemConfigurationService systemConfigurationService;
 
     @Transactional
     public RegistroDiario registrarEntrada(int idEmpleado) {
@@ -75,8 +79,9 @@ public class RegistroDiarioService {
 
         // Cálculo de horas trabajadas base (límite de 8 horas) y extras
         double totalHoras = registro.getHorasTrabajadas();
-        double base = Math.min(totalHoras, 8.5);
-        double extra = Math.max(0.0, totalHoras - 8.5);
+        double standardHours = systemConfigurationService.getJornadaEstandar().doubleValue();
+        double base = Math.min(totalHoras, standardHours);
+        double extra = Math.max(0.0, totalHoras - standardHours);
 
         registro.setHorasBase(BigDecimal.valueOf(base));
         registro.setHorasExtra(BigDecimal.valueOf(extra));
