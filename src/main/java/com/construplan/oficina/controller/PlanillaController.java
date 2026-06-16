@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.construplan.empleado.service.EmpleadoService;
+import com.construplan.oficina.model.dto.WeeklySummaryDTO;
 import com.construplan.oficina.model.entity.EstadoPlanilla;
 import com.construplan.oficina.model.entity.Planilla;
 import com.construplan.oficina.service.PlanillaService;
@@ -176,26 +177,15 @@ public class PlanillaController {
         // Obtener las planillas individuales de la semana seleccionada
         List<Planilla> weeklyPayrolls = planillaService.getPayrollsByStartDate(selectedWeek);
 
-        // Métricas agregadas globales para la semana
-        java.math.BigDecimal totalHorasBase = planillaService.getTotalBaseHoursByWeek(selectedWeek);
-        java.math.BigDecimal totalHorasExtra = planillaService.getTotalExtraHoursByWeek(selectedWeek);
-        java.math.BigDecimal totalPago = planillaService.getTotalPaymentByWeek(selectedWeek);
-        long totalPlanillas = planillaService.countByWeek(selectedWeek);
-        long planillasPagadas = planillaService.countByWeekAndStatus(selectedWeek,
-                com.construplan.oficina.model.entity.EstadoPlanilla.PAGADA);
-        long planillasPendientes = planillaService.countByWeekAndStatus(selectedWeek,
-                com.construplan.oficina.model.entity.EstadoPlanilla.GENERADA);
+        // Métricas agregadas globales para la semana utilizando el DTO
+        WeeklySummaryDTO summary = planillaService.getWeeklySummary(selectedWeek);
+        
 
         model.addAttribute("semanasDisponibles", availableWeeks);
         model.addAttribute("semanaSeleccionada", selectedWeek);
         model.addAttribute("fechaFinSemana", endOfWeek);
         model.addAttribute("planillasSemana", weeklyPayrolls);
-        model.addAttribute("totalHorasBase", totalHorasBase);
-        model.addAttribute("totalHorasExtra", totalHorasExtra);
-        model.addAttribute("totalPago", totalPago);
-        model.addAttribute("totalPlanillas", totalPlanillas);
-        model.addAttribute("planillasPagadas", planillasPagadas);
-        model.addAttribute("planillasPendientes", planillasPendientes);
+        model.addAttribute("summary", summary);
         model.addAttribute("hasDatos", true);
 
         return "oficina/planillas/resumen-semanal";

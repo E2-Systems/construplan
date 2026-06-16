@@ -28,6 +28,7 @@ import com.construplan.empleado.model.entity.Empleado;
 import com.construplan.empleado.model.entity.EstadoTicket;
 import com.construplan.empleado.service.EmpleadoService;
 import com.construplan.empleado.service.TicketService;
+import com.construplan.oficina.model.dto.OficinaDashboardDTO;
 import com.construplan.oficina.model.entity.EstadoPlanilla;
 import com.construplan.oficina.model.entity.PeriodoPago;
 import com.construplan.oficina.model.entity.Planilla;
@@ -90,17 +91,22 @@ public class OficinaController {
                 .limit(5)
                 .collect(java.util.stream.Collectors.toList());
         
-        // Se inyectan todos los atributos al modelo para que Thymeleaf los renderice en la vista
-        model.addAttribute("fechaActual", fechaActual);
-        model.addAttribute("horaActual", horaActual);
-        model.addAttribute("semanaActual", semanaActual);
-        model.addAttribute("planillasGeneradas", planillasGeneradas);
-        model.addAttribute("planillasPendientes", planillasPendientes);
-        model.addAttribute("empleadosActivos", empleadosActivos);
-        model.addAttribute("totalPorPagar", totalPorPagar);
-        model.addAttribute("ajustesPendientes", ajustesPendientes);
-        model.addAttribute("ticketsPendientes", ticketsPendientes);
-        model.addAttribute("planillasRecientes", planillasRecientes);
+        // Se construye el DTO para el dashboard
+        OficinaDashboardDTO dashboard = OficinaDashboardDTO.builder()
+                .fechaActual(fechaActual)
+                .horaActual(horaActual)
+                .semanaActual(semanaActual)
+                .planillasGeneradas(planillasGeneradas)
+                .planillasPendientes(planillasPendientes)
+                .empleadosActivos(empleadosActivos)
+                .totalPorPagar(totalPorPagar)
+                .ajustesPendientes(ajustesPendientes)
+                .ticketsPendientes(ticketsPendientes)
+                .planillasRecientes(planillasRecientes)
+                .build();
+
+        // Se inyecta el DTO único al modelo
+        model.addAttribute("dashboard", dashboard);
 
         return "oficina/dashboard";
     }

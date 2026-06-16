@@ -15,6 +15,7 @@ import com.construplan.empleado.model.entity.Empleado;
 import com.construplan.empleado.model.entity.RegistroDiario;
 import com.construplan.empleado.repository.EmpleadoRepository;
 import com.construplan.empleado.repository.RegistroDiarioRepository;
+import com.construplan.oficina.model.dto.WeeklySummaryDTO;
 import com.construplan.oficina.model.entity.AjustePlanilla;
 import com.construplan.oficina.model.entity.EstadoPlanilla;
 import com.construplan.oficina.model.entity.PeriodoPago;
@@ -391,6 +392,28 @@ public class PlanillaService {
      */
     public long countByWeek(LocalDate startOfWeek) {
         return planillaRepository.countByFechaInicio(startOfWeek);
+    }
+    
+    /**
+     * Obtiene el resumen consolidado de planillas para una semana específica.
+     * Agrupa y calcula horas, montos y cantidad de planillas en un DTO.
+     */
+    public WeeklySummaryDTO getWeeklySummary(LocalDate startOfWeek) {
+        BigDecimal totalHorasBase = getTotalBaseHoursByWeek(startOfWeek);
+        BigDecimal totalHorasExtra = getTotalExtraHoursByWeek(startOfWeek);
+        BigDecimal totalPago = getTotalPaymentByWeek(startOfWeek);
+        long totalPlanillas = countByWeek(startOfWeek);
+        long planillasPagadas = countByWeekAndStatus(startOfWeek, EstadoPlanilla.PAGADA);
+        long planillasPendientes = countByWeekAndStatus(startOfWeek, EstadoPlanilla.GENERADA);
+
+        return WeeklySummaryDTO.builder()
+                .totalBaseHours(totalHorasBase)
+                .totalExtraHours(totalHorasExtra)
+                .totalPayment(totalPago)
+                .totalPayrolls(totalPlanillas)
+                .paidPayrolls(planillasPagadas)
+                .pendingPayrolls(planillasPendientes)
+                .build();
     }
 }
 

@@ -46,10 +46,10 @@
         <div class="px-4 py-6 sm:px-0">
             <h1 class="text-3xl font-bold text-gray-900">Dashboard Oficina Técnica</h1>
             <p class="mt-2 text-sm text-gray-600">
-                <span th:text="${fechaActual}"></span> - <span th:text="${horaActual}"></span>
+                <span th:text="${dashboard.fechaActual}"></span> - <span th:text="${dashboard.horaActual}"></span>
             </p>
             <p class="text-sm text-gray-600">
-                Semana actual: <span class="font-semibold" th:text="${semanaActual}"></span>
+                   Semana actual: <span class="font-semibold" th:text="${dashboard.semanaActual}"></span>
             </p>
         </div>
 
@@ -62,7 +62,7 @@
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm font-medium text-gray-600">Planillas Generadas</p>
-                            <p class="text-3xl font-bold text-primary mt-2" th:text="${planillasGeneradas}"></p>
+                           <p class="text-3xl font-bold text-primary mt-2" th:text="${dashboard.planillasGeneradas}"></p>
                         </div>
                         <div class="bg-blue-100 rounded-full p-3">
                             <svg class="h-8 w-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -79,7 +79,7 @@
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm font-medium text-gray-600">Pendientes de Pago</p>
-                            <p class="text-3xl font-bold text-orange-600 mt-2" th:text="${planillasPendientes}"></p>
+                         <p class="text-3xl font-bold text-orange-600 mt-2" th:text="${dashboard.planillasPendientes}"></p>
                         </div>
                         <div class="bg-orange-100 rounded-full p-3">
                             <svg class="h-8 w-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -99,7 +99,7 @@
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm font-medium text-gray-600">Empleados Activos</p>
-                            <p class="text-3xl font-bold text-green-600 mt-2" th:text="${empleadosActivos}"></p>
+                             <p class="text-3xl font-bold text-green-600 mt-2" th:text="${dashboard.empleadosActivos}"></p>
                         </div>
                         <div class="bg-green-100 rounded-full p-3">
                             <svg class="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -117,7 +117,7 @@
                         <div>
                             <p class="text-sm font-medium text-gray-600">Total por Pagar</p>
                             <p class="text-2xl font-bold text-purple-600 mt-2"
-                                th:text="'S/ ' + ${#numbers.formatDecimal(totalPorPagar, 1, 'COMMA', 2, 'POINT')}"></p>
+                             th:text="'S/ ' + ${#numbers.formatDecimal(dashboard.totalPorPagar, 1, 'COMMA', 2, 'POINT')}"></p>
                         </div>
                         <div class="bg-purple-100 rounded-full p-3">
                             <svg class="h-8 w-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -133,7 +133,7 @@
         </div>
 
         <!-- Alerta condicional — se muestra solo si existen ajustes o tickets pendientes de atención -->
-        <div class="px-4 mb-8" th:if="${ajustesPendientes > 0 or ticketsPendientes > 0}">
+        <div class="px-4 mb-8" th:if="${dashboard.ajustesPendientes > 0 or dashboard.ticketsPendientes > 0}">
             <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
                 <div class="flex">
                     <div class="flex-shrink-0">
@@ -146,14 +146,14 @@
                     <div class="ml-3">
                         <h3 class="text-sm font-medium text-yellow-800">Atención requerida</h3>
                         <div class="mt-2 text-sm text-yellow-700">
-                            <p th:if="${ajustesPendientes > 0}">
-                                • Tienes <strong th:text="${ajustesPendientes}"></strong> ajuste(s) pendiente(s) de
-                                aplicar.
+							<p th:if="${dashboard.ajustesPendientes > 0}">
+							                              • Tienes <strong th:text="${dashboard.ajustesPendientes}"></strong> ajuste(s) pendiente(s) de
+							                              aplicar.
                                 <a th:href="@{/oficina/ajustes}" class="underline ml-2">Revisar →</a>
                             </p>
-                            <p th:if="${ticketsPendientes > 0}">
-                                • Hay <strong th:text="${ticketsPendientes}"></strong> ticket(s) pendiente(s) de
-                                resolución.
+							<p th:if="${dashboard.ticketsPendientes > 0}">
+							                               • Hay <strong th:text="${dashboard.ticketsPendientes}"></strong> ticket(s) pendiente(s) de
+							                               resolución.
                                 <a th:href="@{/oficina/tickets}" class="underline ml-2">Revisar →</a>
                             </p>
                         </div>
@@ -279,7 +279,7 @@
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
-						<tr th:each="plan : ${planillasRecientes}" class="hover:bg-gray-50 transition">
+						  <tr th:each="plan : ${dashboard.planillasRecientes}" class="hover:bg-gray-50 transition">
 						                           <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900" th:text="'#' + ${plan.idPlanilla}">#1</td>
 						                           <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold" th:text="${plan.empleado.nombreCompleto}">Juan Pérez</td>
 						                           <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-medium" 
@@ -310,7 +310,7 @@
 							                               </form>
                             </td>
                         </tr>
-						<tr th:if="${#lists.isEmpty(planillasRecientes)}">
+						    <tr th:if="${#lists.isEmpty(dashboard.planillasRecientes)}">
 						                           <td colspan="8" class="px-6 py-8 text-center text-sm text-gray-500 italic">
 						                               No se registran planillas generadas en el sistema.
                             </td>
