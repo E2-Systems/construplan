@@ -279,57 +279,40 @@
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
-                        <!-- Datos de ejemplo estáticos — se reemplazarán por iteración th:each cuando exista la entidad Planilla -->
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#001</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Juan Pérez García</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">03/02 - 08/02</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">48.0</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">6.0</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">S/ 950.00</td>
+						<tr th:each="plan : ${planillasRecientes}" class="hover:bg-gray-50 transition">
+						                           <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900" th:text="'#' + ${plan.idPlanilla}">#1</td>
+						                           <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold" th:text="${plan.empleado.nombreCompleto}">Juan Pérez</td>
+						                           <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-medium" 
+						                               th:text="${#temporals.format(plan.fechaInicio, 'dd/MM') + ' - ' + #temporals.format(plan.fechaFin, 'dd/MM')}">01/01 - 06/01</td>
+						                           <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800" th:text="${plan.totalHorasBase}">48.0</td>
+						                           <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800" th:text="${plan.totalHorasExtra}">2.5</td>
+						                           <td class="px-6 py-4 whitespace-nowrap text-sm font-extrabold text-gray-900" 
+						                               th:text="'S/ ' + ${#numbers.formatDecimal(plan.totalPago, 1, 'COMMA', 2, 'POINT')}">S/ 1,200.00</td>
+						                           <td class="px-6 py-4 whitespace-nowrap">
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <span
-                                    class="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
+								<span th:if="${plan.estado.name() == 'GENERADA'}" 
+								                                     class="px-2.5 py-1 inline-flex text-xs font-bold leading-5 rounded-full bg-amber-100 text-amber-800 border border-amber-200">
                                     GENERADA
                                 </span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                <button class="text-blue-600 hover:text-blue-800 mr-3">Ver</button>
-                                <button class="text-green-600 hover:text-green-800">Pagar</button>
-                            </td>
-                        </tr>
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#002</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">María López Sánchez</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">03/02 - 08/02</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">48.0</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">4.5</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">S/ 890.50</td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+								<span th:if="${plan.estado.name() == 'PAGADA'}" 
+								                                     class="px-2.5 py-1 inline-flex text-xs font-bold leading-5 rounded-full bg-green-100 text-green-800 border border-green-200">
                                     PAGADA
                                 </span>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                <button class="text-blue-600 hover:text-blue-800">Ver</button>
+							<td class="px-6 py-4 whitespace-nowrap text-sm font-semibold flex items-center gap-3">
+							                               <a th:href="@{/oficina/planillas/detalle/{id}(id=${plan.idPlanilla})}" 
+							                                  class="text-primary hover:text-blue-800">Ver</a>
+							                               <form th:if="${plan.estado.name() == 'GENERADA'}" 
+							                                     th:action="@{/oficina/planillas/detalle/{id}/pagar(id=${plan.idPlanilla})}" method="post" 
+							                                     class="inline-block"
+							                                     onsubmit="return confirm('¿Está seguro de que desea marcar esta planilla como PAGADA?');">
+							                                   <button type="submit" class="text-green-600 hover:text-green-800">Pagar</button>
+							                               </form>
                             </td>
                         </tr>
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#003</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Carlos Rodríguez Torres</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">03/02 - 08/02</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">46.5</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">8.0</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">S/ 1,025.75</td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span
-                                    class="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                                    GENERADA
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                <button class="text-blue-600 hover:text-blue-800 mr-3">Ver</button>
-                                <button class="text-green-600 hover:text-green-800">Pagar</button>
+						<tr th:if="${#lists.isEmpty(planillasRecientes)}">
+						                           <td colspan="8" class="px-6 py-8 text-center text-sm text-gray-500 italic">
+						                               No se registran planillas generadas en el sistema.
                             </td>
                         </tr>
                     </tbody>

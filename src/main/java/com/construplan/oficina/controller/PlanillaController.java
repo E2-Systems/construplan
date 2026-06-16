@@ -142,4 +142,63 @@ public class PlanillaController {
         }
         return "redirect:/oficina/planillas";
     }
+    /**
+     * Muestra el resumen general de pagos de la semana seleccionada,
+     * agregando las métricas de todas las planillas individuales generadas en ese rango.
+     */
+    @GetMapping("/resumen-semanal")
+    public String weeklySummary(@RequestParam(name = "semana", required = false) String weekParam, Model model) {
+        List<java.time.LocalDate> availableWeeks = planillaService.getUniqueStartDates();
+
+        // Por defecto seleccionar la semana más reciente disponible en el sistema
+        java.time.LocalDate selectedWeek = null;
+        if (weekParam != null && !weekParam.isEmpty()) {
+            try {
+                selectedWeek = java.time.LocalDate.parse(weekParam);
+            } catch (Exception ignored) {
+                // Formato inválido, se ignora y se usa la semana más reciente
+            }
+        }
+
+        // Guard temprano: si no hay semanas disponibles, mostrar la vista vacía
+        if (availableWeeks.isEmpty()) {
+            model.addAttribute("semanasDisponibles", availableWeeks);
+            model.addAttribute("hasDatos", false);
+            return "oficina/planillas/resumen-semanal";
+        }
+
+        if (selectedWeek == null) {
+            selectedWeek = availableWeeks.get(0);
+        }
+
+        java.time.LocalDate endOfWeek = selectedWeek.plusDays(5);
+
+        // Obtener las planillas individuales de la semana seleccionada
+        List<Planilla> weeklyPayrolls = planillaService.getPayrollsByStartDate(selectedWeek);
+
+        // Métricas agregadas globales para la semana
+        java.math.BigDecimal totalHorasBase = planillaService.getTotalBaseHoursByWeek(selectedWeek);
+        java.math.BigDecimal totalHorasExtra = planillaService.getTotalExtraHoursByWeek(selectedWeek);
+        java.math.BigDecimal totalPago = planillaService.getTotalPaymentByWeek(selectedWeek);
+        long totalPlanillas = planillaService.countByWeek(selectedWeek);
+        long planillasPagadas = planillaService.countByWeekAndStatus(selectedWeek,
+                com.construplan.oficina.model.entity.EstadoPlanilla.PAGADA);
+        long planillasPendientes = planillaService.countByWeekAndStatus(selectedWeek,
+                com.construplan.oficina.model.entity.EstadoPlanilla.GENERADA);
+
+        model.addAttribute("semanasDisponibles", availableWeeks);
+        model.addAttribute("semanaSeleccionada", selectedWeek);
+        model.addAttribute("fechaFinSemana", endOfWeek);
+        model.addAttribute("planillasSemana", weeklyPayrolls);
+        model.addAttribute("totalHorasBase", totalHorasBase);
+        model.addAttribute("totalHorasExtra", totalHorasExtra);
+        model.addAttribute("totalPago", totalPago);
+        model.addAttribute("totalPlanillas", totalPlanillas);
+        model.addAttribute("planillasPagadas", planillasPagadas);
+        model.addAttribute("planillasPendientes", planillasPendientes);
+        model.addAttribute("hasDatos", true);
+
+        return "oficina/planillas/resumen-semanal";
+    }
 }
+

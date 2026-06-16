@@ -28,6 +28,7 @@ import com.construplan.empleado.model.entity.Empleado;
 import com.construplan.empleado.service.EmpleadoService;
 import com.construplan.oficina.model.entity.EstadoPlanilla;
 import com.construplan.oficina.model.entity.PeriodoPago;
+import com.construplan.oficina.model.entity.Planilla;
 import com.construplan.oficina.model.entity.Sueldo;
 import com.construplan.oficina.repository.AjustePlanillaRepository;
 import com.construplan.oficina.repository.PlanillaRepository;
@@ -79,6 +80,11 @@ public class OficinaController {
         long ajustesPendientes = ajustePlanillaRepository.countByPlanilla_Estado(EstadoPlanilla.GENERADA);
         int ticketsPendientes = 5;
 
+     // Obtener las últimas 5 planillas reales generadas para mostrar en la tabla de planillas recientes
+        List<Planilla> planillasRecientes = planillaRepository.findAllWithEmpleado().stream()
+                .limit(5)
+                .collect(java.util.stream.Collectors.toList());
+        
         // Se inyectan todos los atributos al modelo para que Thymeleaf los renderice en la vista
         model.addAttribute("fechaActual", fechaActual);
         model.addAttribute("horaActual", horaActual);
@@ -89,6 +95,7 @@ public class OficinaController {
         model.addAttribute("totalPorPagar", totalPorPagar);
         model.addAttribute("ajustesPendientes", ajustesPendientes);
         model.addAttribute("ticketsPendientes", ticketsPendientes);
+        model.addAttribute("planillasRecientes", planillasRecientes);
 
         return "oficina/dashboard";
     }

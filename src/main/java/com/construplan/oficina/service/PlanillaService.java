@@ -344,4 +344,53 @@ public class PlanillaService {
 
         planillaRepository.delete(payroll);
     }
+    /**
+     * Obtiene las planillas generadas en una semana específica ordenadas por apellido del empleado.
+     */
+    public List<Planilla> getPayrollsByStartDate(LocalDate startOfWeek) {
+        return planillaRepository.findByFechaInicioOrderByEmpleado_ApellidosAsc(startOfWeek);
+    }
+
+    /**
+     * Obtiene todas las fechas de inicio únicas de las planillas generadas en el sistema.
+     */
+    public List<LocalDate> getUniqueStartDates() {
+        return planillaRepository.findDistinctFechaInicio();
+    }
+
+    /**
+     * Calcula la suma total de horas base para todas las planillas de una semana específica.
+     */
+    public BigDecimal getTotalBaseHoursByWeek(LocalDate startOfWeek) {
+        return planillaRepository.sumTotalHorasBaseByFechaInicio(startOfWeek);
+    }
+
+    /**
+     * Calcula la suma total de horas extra para todas las planillas de una semana específica.
+     */
+    public BigDecimal getTotalExtraHoursByWeek(LocalDate startOfWeek) {
+        return planillaRepository.sumTotalHorasExtraByFechaInicio(startOfWeek);
+    }
+
+    /**
+     * Calcula la suma del pago neto total para todas las planillas de una semana específica.
+     */
+    public BigDecimal getTotalPaymentByWeek(LocalDate startOfWeek) {
+        return planillaRepository.sumTotalPagoByFechaInicio(startOfWeek);
+    }
+
+    /**
+     * Cuenta la cantidad de planillas que tienen un estado particular dentro de una semana específica.
+     */
+    public long countByWeekAndStatus(LocalDate startOfWeek, EstadoPlanilla status) {
+        return planillaRepository.countByFechaInicioAndEstado(startOfWeek, status);
+    }
+
+    /**
+     * Cuenta la cantidad total de planillas generadas para una semana específica.
+     */
+    public long countByWeek(LocalDate startOfWeek) {
+        return planillaRepository.countByFechaInicio(startOfWeek);
+    }
 }
+

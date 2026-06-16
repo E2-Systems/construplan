@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resumen General Semanal - ConstruPlan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#004E89',
+                        secondary: '#FF6B35',
+                        accent: '#FFD23F',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-gray-50 flex flex-col min-h-screen">
+
+    <!-- Navbar -->
+    <div th:replace="~{fragments/navbar :: navbar('planillas')}"></div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 w-full flex-grow">
+
+        <!-- Encabezado -->
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Planilla General Semanal</h1>
+                <p class="text-sm text-gray-600 mt-1">
+                    Resumen consolidado de todos los pagos realizados en la semana seleccionada.
+                </p>
+            </div>
+            <div class="mt-4 md:mt-0 flex gap-3">
+                <a th:href="@{/oficina/planillas}"
+                    class="px-4 py-2.5 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition text-sm font-semibold flex items-center shadow-sm">
+                    ← Volver a Planillas
+                </a>
+            </div>
+        </div>
+
+        <!-- Selector de Semana -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 mb-6">
+            <form th:action="@{/oficina/planillas/resumen-semanal}" method="get" class="flex flex-col sm:flex-row items-start sm:items-end gap-4">
+                <div class="flex-grow">
+                    <label for="selectSemana" class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">
+                        Seleccionar Semana
+                    </label>
+                    <select id="selectSemana" name="semana"
+                            class="block w-full sm:w-72 rounded-lg border-gray-300 shadow-sm focus:ring-primary focus:border-primary text-sm font-medium text-gray-800 py-2.5 px-3 border">
+                        <option th:if="${hasDatos == false}" value="" selected>— Sin semanas registradas —</option>
+                        <option th:each="semana : ${semanasDisponibles}"
+                                th:value="${semana}"
+                                th:selected="${semanaSeleccionada != null && semana.equals(semanaSeleccionada)}"
+                                th:text="${'Semana del ' + #temporals.format(semana, 'dd/MM/yyyy') + ' al ' + #temporals.format(semana.plusDays(5), 'dd/MM/yyyy')}">
+                            Semana del 09/06/2026 al 14/06/2026
+                        </option>
+                    </select>
+                </div>
+                <button type="submit"
+                        class="px-5 py-2.5 bg-primary hover:bg-blue-800 text-white rounded-lg shadow transition duration-150 text-sm font-semibold flex items-center gap-2"
+                        th:disabled="${hasDatos == false}">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                    Consultar
+                </button>
+            </form>
+        </div>
+
+        <!-- Contenido principal: Solo visible si hay datos para la semana seleccionada -->
+        <div th:if="${hasDatos}">
+
+            <!-- Tarjetas de KPIs Globales -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
+
+                <!-- Total Empleados -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 hover:shadow-md transition">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Empleados</p>
+                            <p class="text-3xl font-black text-primary mt-1" th:text="${totalPlanillas}">12</p>
+                        </div>
+                        <div class="bg-blue-100 rounded-xl p-3">
+                            <svg class="h-7 w-7 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="mt-3 flex items-center gap-3 text-xs">
+                        <span class="inline-flex items-center gap-1 text-green-600 font-bold">
+                            <span class="h-2 w-2 rounded-full bg-green-500 inline-block"></span>
+                            <span th:text="${planillasPagadas}">8</span> Pagadas
+                        </span>
+                        <span class="inline-flex items-center gap-1 text-amber-600 font-bold">
+                            <span class="h-2 w-2 rounded-full bg-amber-500 inline-block"></span>
+                            <span th:text="${planillasPendientes}">4</span> Pendientes
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Total Horas Base -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 hover:shadow-md transition">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Horas Base</p>
+                            <p class="text-3xl font-black text-gray-900 mt-1" th:text="${totalHorasBase}">576.00</p>
+                        </div>
+                        <div class="bg-indigo-100 rounded-xl p-3">
+                            <svg class="h-7 w-7 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-400 mt-3 font-medium">Jornada regular acumulada</p>
+                </div>
+
+                <!-- Total Horas Extra -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 hover:shadow-md transition">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Horas Extra</p>
+                            <p class="text-3xl font-black text-secondary mt-1" th:text="${totalHorasExtra}">24.50</p>
+                        </div>
+                        <div class="bg-orange-100 rounded-xl p-3">
+                            <svg class="h-7 w-7 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                            </svg>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-400 mt-3 font-medium">Horas adicionales (factor 1.25x)</p>
+                </div>
+
+                <!-- Total Pago Consolidado -->
+                <div class="bg-gradient-to-br from-primary to-blue-900 rounded-2xl shadow-md p-5 text-white hover:shadow-lg transition">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-bold text-blue-200 uppercase tracking-wider">Pago Total</p>
+                            <p class="text-2xl font-black text-accent mt-1"
+                               th:text="'S/ ' + ${#numbers.formatDecimal(totalPago, 1, 'COMMA', 2, 'POINT')}">
+                                S/ 14,500.00
+                            </p>
+                        </div>
+                        <div class="bg-white/15 rounded-xl p-3 border border-white/10">
+                            <svg class="h-7 w-7 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <p class="text-xs text-blue-200 mt-3 font-medium">Neto consolidado de la semana</p>
+                </div>
+            </div>
+
+            <!-- Cabecera del Periodo -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 mb-6">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <h2 class="text-lg font-bold text-gray-900">
+                            Periodo: 
+                            <span th:text="${#temporals.format(semanaSeleccionada, 'dd/MM/yyyy')}" class="text-primary">09/06/2026</span>
+                            al
+                            <span th:text="${#temporals.format(fechaFinSemana, 'dd/MM/yyyy')}" class="text-primary">14/06/2026</span>
+                        </h2>
+                        <p class="text-xs text-gray-500 mt-1">
+                            Listado detallado de todas las planillas individuales generadas para esta semana laboral.
+                        </p>
+                    </div>
+                    <!-- Barra de progreso de pagos -->
+                    <div class="mt-3 sm:mt-0 sm:text-right">
+                        <div class="flex items-center gap-2 text-xs font-bold text-gray-600 mb-1">
+                            <span>Progreso de pagos:</span>
+                            <span th:text="${planillasPagadas + '/' + totalPlanillas}" class="text-primary">8/12</span>
+                        </div>
+                        <div class="w-48 bg-gray-200 rounded-full h-2.5 overflow-hidden">
+                            <div class="bg-green-500 h-2.5 rounded-full transition-all duration-300"
+                                 th:style="'width: ' + ${totalPlanillas > 0 ? (planillasPagadas * 100 / totalPlanillas) : 0} + '%'">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabla de Planillas de la Semana -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden mb-8">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">#</th>
+                                <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Empleado</th>
+                                <th class="px-6 py-4 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">Horas Base</th>
+                                <th class="px-6 py-4 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">Horas Extra</th>
+                                <th class="px-6 py-4 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Neto a Recibir</th>
+                                <th class="px-6 py-4 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">Estado</th>
+                                <th class="px-6 py-4 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-100">
+                            <tr th:each="plan, iterStat : ${planillasSemana}" class="hover:bg-gray-50/50 transition duration-150">
+                                <!-- Numeración correlativa -->
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-400" th:text="${iterStat.count}">1</td>
+
+                                <!-- Empleado -->
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="flex-shrink-0 h-10 w-10 bg-indigo-50 text-primary font-bold rounded-xl flex items-center justify-center border border-indigo-100 shadow-sm">
+                                            <span th:text="${#strings.substring(plan.empleado.nombres, 0, 1) + #strings.substring(plan.empleado.apellidos, 0, 1)}">EP</span>
+                                        </div>
+                                        <div class="ml-4">
+                                            <div class="text-sm font-semibold text-gray-900" th:text="${plan.empleado.nombreCompleto}">Juan Pérez</div>
+                                            <div class="text-xs text-gray-500" th:text="${'DNI: ' + plan.empleado.dni}">DNI</div>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <!-- Horas Base -->
+                                <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-semibold text-gray-800" th:text="${plan.totalHorasBase}">
+                                    48.00
+                                </td>
+
+                                <!-- Horas Extra -->
+                                <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-semibold text-gray-800">
+                                    <span th:if="${plan.totalHorasExtra.compareTo(T(java.math.BigDecimal).ZERO) > 0}" 
+                                          class="text-secondary font-bold" 
+                                          th:text="${plan.totalHorasExtra}">4.00</span>
+                                    <span th:unless="${plan.totalHorasExtra.compareTo(T(java.math.BigDecimal).ZERO) > 0}" 
+                                          class="text-gray-400 font-normal">0.00</span>
+                                </td>
+
+                                <!-- Pago Neto -->
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-black text-gray-950" 
+                                    th:text="'S/ ' + ${#numbers.formatDecimal(plan.totalPago, 1, 'COMMA', 2, 'POINT')}">
+                                    S/ 1,200.00
+                                </td>
+
+                                <!-- Estado -->
+                                <td class="px-6 py-4 whitespace-nowrap text-center">
+                                    <span th:if="${plan.estado.name() == 'GENERADA'}" 
+                                          class="px-2.5 py-1 inline-flex text-xs leading-5 font-extrabold rounded-full bg-amber-100 text-amber-800 border border-amber-200">
+                                        PENDIENTE
+                                    </span>
+                                    <span th:if="${plan.estado.name() == 'PAGADA'}" 
+                                          class="px-2.5 py-1 inline-flex text-xs leading-5 font-extrabold rounded-full bg-green-100 text-green-800 border border-green-200">
+                                        PAGADA
+                                    </span>
+                                </td>
+
+                                <!-- Acciones -->
+                                <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
+                                    <a th:href="@{/oficina/planillas/detalle/{id}(id=${plan.idPlanilla})}"
+                                       class="text-primary hover:text-white border border-primary hover:bg-primary px-3.5 py-1.5 rounded-lg transition duration-150 shadow-sm font-semibold">
+                                        Ver Detalle
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(planillasSemana)}">
+                                <td colspan="7" class="px-6 py-12 text-center text-sm text-gray-500">
+                                    <div class="flex flex-col items-center justify-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-300 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                        </svg>
+                                        <span class="font-medium text-gray-600 block">No se encontraron planillas para esta semana</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                        <!-- Pie de tabla con los totales consolidados -->
+                        <tfoot th:if="${!#lists.isEmpty(planillasSemana)}" class="bg-gray-50 border-t-2 border-gray-300">
+                            <tr>
+                                <td class="px-6 py-4 text-sm font-black text-gray-900 uppercase" colspan="2">Totales de la Semana</td>
+                                <td class="px-6 py-4 text-center text-sm font-black text-gray-900" th:text="${totalHorasBase}">576.00</td>
+                                <td class="px-6 py-4 text-center text-sm font-black text-secondary" th:text="${totalHorasExtra}">24.50</td>
+                                <td class="px-6 py-4 text-right text-sm font-black text-primary text-lg"
+                                    th:text="'S/ ' + ${#numbers.formatDecimal(totalPago, 1, 'COMMA', 2, 'POINT')}">
+                                    S/ 14,500.00
+                                </td>
+                                <td class="px-6 py-4 text-center text-xs font-bold text-gray-500"
+                                    th:text="${planillasPagadas + '/' + totalPlanillas + ' pagadas'}">
+                                    8/12 pagadas
+                                </td>
+                                <td class="px-6 py-4"></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Estado vacío: No hay datos disponibles en el sistema -->
+        <div th:if="${!hasDatos}" class="bg-white rounded-2xl shadow-sm border border-gray-200 p-12 text-center mb-8">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-gray-300 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            <h3 class="text-lg font-bold text-gray-600 mb-2">Sin planillas registradas</h3>
+            <p class="text-sm text-gray-400 mb-6">Aún no se han generado planillas semanales en el sistema. Genera tu primera planilla para comenzar a ver el resumen.</p>
+            <a th:href="@{/oficina/planillas/generar}"
+               class="inline-flex items-center gap-2 px-5 py-2.5 bg-primary hover:bg-blue-800 text-white rounded-lg shadow transition text-sm font-semibold">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+                Generar Primera Planilla
+            </a>
+        </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div th:replace="~{fragments/footer :: footer}"></div>
+
+</body>
+
+</html>

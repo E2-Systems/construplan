@@ -225,7 +225,7 @@
                                     Préstamo extraordinaria
                                 </td>
                                 <td class="px-6 py-3.5 whitespace-nowrap text-right text-sm font-bold text-gray-900" 
-                                    th:text="'-S/ ' + ${#numbers.formatDecimal(ajuste.monto, 1, 'COMMA', 2, 'POINT')}">
+                                    th:text="'S/ ' + ${#numbers.formatDecimal(ajuste.monto, 1, 'COMMA', 2, 'POINT')}">
                                     -S/ 100.00
                                 </td>
                                 <td class="px-6 py-3.5 whitespace-nowrap text-center" th:if="${planilla.estado.name() == 'GENERADA'}">
