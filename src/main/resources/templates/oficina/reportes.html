@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reportes del Sistema - ConstruPlan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        /* Definición de la paleta de colores corporativa para Tailwind CSS */
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#004E89',
+                        secondary: '#FF6B35',
+                        accent: '#FFD23F',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50">
+    <!-- Navbar común con foco en la opción de Reportes -->
+    <div th:replace="~{fragments/navbar :: navbar('reportes')}"></div>
+
+    <!-- Contenido Principal -->
+    <div class="max-w-4xl mx-auto py-6 sm:px-6 lg:px-8">
+        <!-- Breadcrumb para facilitar la navegación jerárquica -->
+        <div class="px-4 mb-6">
+            <nav class="flex" aria-label="Breadcrumb">
+                <ol class="flex items-center space-x-2">
+                    <li>
+                        <a th:href="@{/oficina/dashboard}" class="text-gray-500 hover:text-gray-700">
+                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/>
+                            </svg>
+                        </a>
+                    </li>
+                    <li class="flex items-center">
+                        <svg class="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+                        </svg>
+                        <span class="ml-2 text-gray-700 font-medium">Reportes</span>
+                    </li>
+                </ol>
+            </nav>
+        </div>
+
+        <!-- Encabezado de la Sección -->
+        <div class="px-4 mb-6">
+            <h1 class="text-3xl font-bold text-gray-900">Módulo de Reportes</h1>
+            <p class="mt-2 text-sm text-gray-600">Genera y exporta reportes en formato PDF oficial para el control interno, auditoría y firmas de conformidad física en obra</p>
+        </div>
+
+        <!-- Alertas de Errores con lógica Thymeleaf -->
+        <div th:if="${error}" class="px-4 mb-6">
+            <div class="bg-red-50 border-l-4 border-red-400 p-4 rounded shadow-sm">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm text-red-700" th:text="${error}"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contenedor del Formulario del Reporte -->
+        <div class="px-4">
+            <div class="bg-white shadow rounded-lg p-6">
+                <h2 class="text-lg font-medium text-gray-900 border-b pb-2 mb-6">Reporte Semanal de Planillas</h2>
+                
+                <form th:action="@{/oficina/reportes/descargar}" method="get" id="reportForm" class="space-y-6">
+                    <!-- Dropdown de Selección de Semanas -->
+                    <div>
+                        <label for="fechaInicio" class="block text-sm font-medium text-gray-700 mb-2">
+                            Seleccionar Semana de Obra <span class="text-red-500">*</span>
+                        </label>
+                        
+                        <div class="relative">
+                            <select id="fechaInicio" 
+                                    name="fechaInicio" 
+                                    required
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition appearance-none cursor-pointer">
+                                <option value="">--- Seleccione una semana con planillas procesadas ---</option>
+                                <option th:each="sem : ${semanasDisponibles}"
+                                        th:value="${sem}"
+                                        th:text="'Semana del ' + ${#temporals.format(sem, 'dd/MM/yyyy')} + ' al ' + ${#temporals.format(sem.plusDays(5), 'dd/MM/yyyy')}">
+                                </option>
+                            </select>
+                            
+                            <!-- Flecha select personalizada -->
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-500">
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/>
+                                </svg>
+                            </div>
+                        </div>
+                        
+                        <p class="mt-2 text-xs text-gray-500">
+                            Solo se muestran periodos semanales que cuenten con planillas generadas en el sistema.
+                        </p>
+                    </div>
+
+                    <!-- Panel Informativo sobre el Documento a Descargar -->
+                    <div class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded text-sm text-blue-800">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <svg class="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                                </svg>
+                            </div>
+                            <div class="ml-3">
+                                <h3 class="font-medium text-blue-900">Estructura del Reporte PDF</h3>
+                                <div class="mt-1 text-blue-700 space-y-1">
+                                    <ul class="list-disc list-inside">
+                                        <li>Cuadros de KPIs dinámicos: Cantidad de planillas y costos consolidados.</li>
+                                        <li>Tabla de Mano de Obra: Horas laboradas y montos individuales valorizados.</li>
+                                        <li>Espacios formales para firmas de aprobación de la Oficina Técnica y Supervisión.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Botones de Acción -->
+                    <div class="mt-8 flex items-center justify-end space-x-4 border-t pt-4">
+                        <a th:href="@{/oficina/dashboard}" 
+                           class="px-6 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition font-medium">
+                            Cancelar
+                        </a>
+                        <button type="submit" 
+                                id="downloadBtn"
+                                class="px-6 py-2.5 bg-primary text-white rounded-lg hover:bg-blue-800 transition font-medium flex items-center">
+                            <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                            </svg>
+                            Descargar Reporte PDF
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pie de página general -->
+    <div th:replace="~{fragments/footer :: footer}"></div>
+
+    <!-- Script de validación simple del lado del cliente -->
+    <script>
+        document.getElementById('reportForm').addEventListener('submit', function(e) {
+            const select = document.getElementById('fechaInicio');
+            if (select.value === "") {
+                e.preventDefault();
+                alert('Debe seleccionar una semana válida para poder exportar el reporte.');
+                select.focus();
+                return false;
+            }
+            
+            // Opcional: animación temporal en el botón durante la descarga
+            const btn = document.getElementById('downloadBtn');
+            const originalContent = btn.innerHTML;
+            btn.innerHTML = `<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                             </svg> Procesando PDF...`;
+            
+            setTimeout(() => {
+                btn.innerHTML = originalContent;
+            }, 3000);
+            
+            return true;
+        });
+    </script>
+</body>
+</html>
