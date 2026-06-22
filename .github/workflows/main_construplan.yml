@@ -50,4 +50,4 @@ jobs:
           app-name: 'construplan'
           slot-name: 'Production'
           package: '*.jar'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_57D84EEBF1B64D0EB1F342ED35735DD8 }}
+          publish-profile: ${{ secrets.__publishingprofilesecretname__ }}
