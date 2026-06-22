@@ -56,3 +56,13 @@ Thumbs.db
 # === Archivos de conexión a la BD (credenciales sensibles) ===
 src/main/resources/application.properties
 src/main/resources/application.yml
+
+
+# Credenciales y configuraciones locales
+application-local.properties
+application-dev.properties
+
+# Archivos sensibles
+*.env
+*.key
+*.pem
