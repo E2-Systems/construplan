@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Empleado - ConstruPlan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#004E89',
+                        secondary: '#FF6B35',
+                        accent: '#FFD23F',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50">
+
+   <div th:replace="~{fragments/navbar :: navbar('dashboard')}"></div>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+
+        <!-- Header -->
+        <div class="px-4 py-6 sm:px-0">
+            <h1 class="text-3xl font-bold text-gray-900"
+                th:text="'¡Bienvenido, ' + ${empleado.nombres} + '!'"></h1>
+            <p class="mt-2 text-sm text-gray-600">
+                Hoy es <span th:text="${fechaActual}"></span> -
+                <span id="reloj-header"></span>
+            </p>
+        </div>
+		<!-- Alerta de Tarea Asignada para Hoy -->
+		     <div class="px-4 mb-6" th:if="${asignacionPendiente != null}">
+		         <div class="bg-blue-50 border-l-4 border-primary p-5 rounded-lg shadow-sm">
+		             <div class="flex items-start">
+		                 <div class="flex-shrink-0">
+		                     <svg class="h-6 w-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+		                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+		                               d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+		                     </svg>
+		                 </div>
+		                 <div class="ml-3 flex-grow">
+		                     <h3 class="text-sm font-bold text-primary">Tarea Asignada Pendiente</h3>
+		                     <div class="mt-2 text-sm text-gray-700">
+		                         <p class="mb-1">Tienes una actividad asignada para realizar hoy en obra:</p>
+		                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-3 p-3 bg-white rounded-md border border-blue-100">
+		                             <div>
+		                                 <span class="block text-xs font-semibold text-gray-400 uppercase">Actividad</span>
+		                                 <span class="text-sm font-bold text-gray-900" th:text="${asignacionPendiente.meta.tarea.nombre}">Instalación de tuberías</span>
+		                             </div>
+		                             <div>
+		                                 <span class="block text-xs font-semibold text-gray-400 uppercase">Meta a Cumplir</span>
+		                                 <span class="text-sm font-bold text-gray-900" 
+		                                       th:text="${#numbers.formatDecimal(asignacionPendiente.meta.cantidad, 1, 0)} + ' ' + ${asignacionPendiente.meta.tarea.unidadMedida}">50 metros</span>
+		                             </div>
+		                             <div>
+		                                 <span class="block text-xs font-semibold text-gray-400 uppercase">Proyecto / Obra</span>
+		                                 <span class="text-sm font-bold text-gray-900" th:text="${asignacionPendiente.proyecto.nombre}">Obra Las Acacias</span>
+		                             </div>
+		                             <div>
+		                                 <span class="block text-xs font-semibold text-gray-400 uppercase">Asignado Por</span>
+		                                 <span class="text-sm font-bold text-gray-900" th:text="${asignacionPendiente.asignador.username}">supervisor1</span>
+		                             </div>
+		                         </div>
+		                     </div>
+		                 </div>
+		             </div>
+		         </div>
+		     </div>
+        <!-- Registro Rápido de Asistencia -->
+        <div class="px-4 mb-8">
+            <div class="bg-gradient-to-r from-primary to-blue-800 rounded-lg shadow-xl p-6 text-white">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <h2 class="text-2xl font-bold mb-4">Registro de Asistencia</h2>
+                        <p class="text-blue-100 mb-6">Registra tu entrada o salida del trabajo</p>
+                        <div class="text-5xl font-bold mb-2" id="reloj">--:--</div>
+                        <p class="text-blue-100">Hora actual</p>
+
+                        <!-- Estado -->
+                        <div class="mt-4 px-4 py-2 bg-blue-900 bg-opacity-50 rounded-lg">
+                            <p class="text-sm font-semibold">Estado actual:</p>
+                            <p class="text-lg">
+                                <span th:if="${estadoAsistencia == 'SIN_ENTRADA'}">⏸️ Sin registrar</span>
+                                <span th:if="${estadoAsistencia == 'EN_TURNO'}">✅ En turno</span>
+                                <span th:if="${estadoAsistencia == 'JORNADA_COMPLETA'}">✔️ Jornada completa</span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col justify-center space-y-4">
+                        <!-- Botón Entrada -->
+                        <button onclick="registrarEntrada()"
+                                th:disabled="${estadoAsistencia != 'SIN_ENTRADA'}"
+                                th:classappend="${estadoAsistencia != 'SIN_ENTRADA'} ? 'opacity-50 cursor-not-allowed' : ''"
+                                class="btn-registro w-full bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-6 rounded-lg transition duration-200 flex items-center justify-center">
+                            <svg class="h-6 w-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
+                            </svg>
+                            Registrar Entrada
+                        </button>
+
+                        <!-- Botón Completar Tarea — solo si puedeCompletarTarea -->
+                        <button th:if="${puedeCompletarTarea}"
+                                onclick="completarTarea()"
+                                class="btn-registro w-full bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-4 px-6 rounded-lg transition duration-200 flex items-center justify-center">
+                            <svg class="h-6 w-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            Tarea Completada
+                        </button>
+
+                        <!-- Botón Salida -->
+                        <button onclick="registrarSalida()"
+                                th:disabled="${estadoAsistencia != 'EN_TURNO'}"
+                                th:classappend="${estadoAsistencia != 'EN_TURNO'} ? 'opacity-50 cursor-not-allowed' : ''"
+                                class="btn-registro w-full bg-red-500 hover:bg-red-600 text-white font-bold py-4 px-6 rounded-lg transition duration-200 flex items-center justify-center">
+                            <svg class="h-6 w-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                            </svg>
+                            Registrar Salida
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+		<!-- Stats Cards -->
+		        <div class="px-4 mb-8">
+		            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+		                <!-- Horas Semanales -->
+		                <div class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition">
+		                    <div class="flex items-center justify-between">
+		                        <div>
+		                            <p class="text-sm font-medium text-gray-600">Horas esta Semana</p>
+		                            <p class="text-3xl font-bold text-primary mt-2">
+		                                <span th:text="${#numbers.formatDecimal(horasSemanales, 1, 1)}"></span> hrs
+		                            </p>
+		                        </div>
+		                        <div class="bg-blue-100 rounded-full p-3">
+		                            <svg class="h-8 w-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+		                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+		                            </svg>
+		                        </div>
+		                    </div>
+		                    <div class="mt-4">
+		                        <div class="w-full bg-gray-200 rounded-full h-2">
+		                            <div class="bg-primary h-2 rounded-full"		                                
+										 th:style="'width: ' + (${horasSemanales gt 48} ? 100 : ${horasSemanales / 48 * 100}) + '%'">
+									  </div>
+		                        </div>
+		                        <p class="text-xs text-gray-500 mt-1">Meta: 48 horas semanales</p>
+		                    </div>
+		                </div>
+
+		                <!-- Horas Extras -->
+		                <div class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition">
+		                    <div class="flex items-center justify-between">
+		                        <div>
+		                            <p class="text-sm font-medium text-gray-600">Horas Extras</p>
+		                            <p class="text-3xl font-bold text-green-600 mt-2">
+		                                <span th:text="${#numbers.formatDecimal(horasExtras, 1, 1)}"></span> hrs
+		                            </p>
+		                        </div>
+		                        <div class="bg-green-100 rounded-full p-3">
+		                            <svg class="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+		                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+		                            </svg>
+		                        </div>
+		                    </div>
+		                    <p class="text-xs text-gray-500 mt-4">Pago adicional por horas extras trabajadas</p>
+		                </div>
+
+		                <!-- Tickets Abiertos -->
+		                <div class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition">
+		                    <div class="flex items-center justify-between">
+		                        <div>
+		                            <p class="text-sm font-medium text-gray-600">Tickets Abiertos</p>
+		                            <p class="text-3xl font-bold text-orange-600 mt-2"
+		                               th:text="${ticketsAbiertos}"></p>
+		                        </div>
+		                        <div class="bg-orange-100 rounded-full p-3">
+		                            <svg class="h-8 w-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+		                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/>
+		                            </svg>
+		                        </div>
+		                    </div>
+		                    <p class="text-xs text-gray-500 mt-4">
+		                        <a th:if="${ticketsAbiertos > 0}"
+		                           th:href="@{/empleado/tickets}"
+		                           class="text-orange-600 hover:underline">
+		                            Ver tickets pendientes →
+		                        </a>
+		                        <span th:unless="${ticketsAbiertos > 0}">No tienes tickets pendientes</span>
+		                    </p>
+		                </div>
+		            </div>
+		        </div>
+
+		        <!-- Acciones Rápidas -->
+		        <div class="px-4 mb-8">
+		            <h2 class="text-xl font-bold text-gray-900 mb-4">Acciones Rápidas</h2>
+		            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+		                <a th:href="@{/empleado/registro-horas}"
+		                   class="flex items-center p-4 bg-white rounded-lg shadow hover:shadow-lg transition border-l-4 border-blue-500">
+		                    <div class="bg-blue-100 rounded-full p-3 mr-4">
+		                        <svg class="h-8 w-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+		                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+		                        </svg>
+		                    </div>
+		                    <div>
+		                        <h3 class="font-semibold text-gray-900">Ver Registro</h3>
+		                        <p class="text-sm text-gray-600">Consulta tus horas trabajadas</p>
+		                    </div>
+		                </a>
+
+		                <a th:href="@{/empleado/planillas}"
+		                   class="flex items-center p-4 bg-white rounded-lg shadow hover:shadow-lg transition border-l-4 border-green-500">
+		                    <div class="bg-green-100 rounded-full p-3 mr-4">
+		                        <svg class="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+		                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+		                        </svg>
+		                    </div>
+		                    <div>
+		                        <h3 class="font-semibold text-gray-900">Mis Planillas</h3>
+		                        <p class="text-sm text-gray-600">Consulta tus pagos</p>
+		                    </div>
+		                </a>
+
+		          
+						<a th:href="@{/tickets/nuevo}"
+		                   class="flex items-center p-4 bg-white rounded-lg shadow hover:shadow-lg transition border-l-4 border-orange-500">
+		                    <div class="bg-orange-100 rounded-full p-3 mr-4">
+		                        <svg class="h-8 w-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+		                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+		                        </svg>
+		                    </div>
+		                    <div>
+		                        <h3 class="font-semibold text-gray-900">Crear Ticket</h3>
+		                        <p class="text-sm text-gray-600">Reporta una inconformidad</p>
+		                    </div>
+		                </a>
+		            </div>
+		        </div>
+
+		        <!-- Últimos Registros -->
+		        <div class="px-4">
+		            <h2 class="text-xl font-bold text-gray-900 mb-4">Últimos Registros</h2>
+		            <div class="bg-white rounded-lg shadow overflow-hidden">
+		                <table class="min-w-full divide-y divide-gray-200">
+		                    <thead class="bg-gray-50">
+		                        <tr>
+		                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fecha</th>
+		                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Entrada</th>
+		                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Salida</th>
+		                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Horas</th>
+		                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
+		                        </tr>
+		                    </thead>
+		                    <tbody class="bg-white divide-y divide-gray-200">
+
+		                        <!-- Filas con datos -->
+		                        <tr th:each="r : ${ultimosRegistros}" class="hover:bg-gray-50">
+		                            <td class="px-6 py-4 text-sm text-gray-900"
+		                                th:text="${r.asignacion.fecha}"></td>
+		                            <td class="px-6 py-4 text-sm text-gray-900"
+		                                th:text="${r.horaInicio != null ? r.horaInicio : '-'}"></td>
+		                            <td class="px-6 py-4 text-sm text-gray-900"
+		                                th:text="${r.horaFin != null ? r.horaFin : '-'}"></td>
+		                            <td class="px-6 py-4 text-sm font-medium text-gray-900"
+		                                th:text="${r.horasTrabajadas} + ' hrs'"></td>
+		                            <td class="px-6 py-4 whitespace-nowrap">
+		                                <span th:text="${r.estado}"
+		                                      th:classappend="${r.estado == 'APROBADO'} ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'"
+		                                      class="px-2 py-1 text-xs font-semibold rounded-full">
+		                                </span>
+		                            </td>
+		                        </tr>
+
+		                        <!-- Sin registros -->
+		                        <tr th:if="${#lists.isEmpty(ultimosRegistros)}">
+		                            <td colspan="5" class="px-6 py-4 text-center text-gray-500">
+		                                No hay registros aún.
+		                            </td>
+		                        </tr>
+
+		                    </tbody>
+		                </table>
+		            </div>
+		        </div>
+		    </div>
+
+		    <!-- Footer -->
+		    <footer class="bg-white mt-12">
+		        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+		            <p class="text-center text-sm text-gray-500">
+		                &copy; 2024 ConstruPlan. Todos los derechos reservados.
+		            </p>
+		        </div>
+		    </footer>
+
+		    <script th:inline="javascript">
+		        // ── Reloj ─────────────────────────────────────────────────────────────
+		        function actualizarReloj() {
+		            const ahora = new Date();
+		            const hora = String(ahora.getHours()).padStart(2, '0') + ':' + String(ahora.getMinutes()).padStart(2, '0');
+		            document.getElementById('reloj').textContent = hora;
+		            const h = document.getElementById('reloj-header');
+		            if (h) h.textContent = hora;
+		        }
+		        actualizarReloj();
+		        setInterval(actualizarReloj, 1000);
+
+		        // ── CSRF para fetch ───────────────────────────────────────────────────
+		        const csrfToken  = /*[[${_csrf.token}]]*/ '';
+		        const csrfHeader = /*[[${_csrf.headerName}]]*/ '';
+
+		        // ── Registro de asistencia ────────────────────────────────────────────
+		        function registrarEntrada() {
+		            if (!confirm('¿Confirmar registro de entrada?')) return;
+		            enviarRegistro('entrada', 'Entrada registrada', 'green');
+		        }
+
+		        function registrarSalida() {
+		            if (!confirm('¿Confirmar registro de salida?')) return;
+		            enviarRegistro('salida', 'Salida registrada', 'red');
+		        }
+
+		        function completarTarea() {
+		            if (!confirm('¿Confirmar que completaste la tarea?')) return;
+		            enviarRegistro('completar-tarea', 'Tarea completada', 'yellow');
+		        }
+
+		        function enviarRegistro(accion, mensajeExito, color) {
+		            deshabilitarBotones(true);
+
+		            fetch('/empleado/registro-asistencia', {
+		                method: 'POST',
+		                headers: {
+		                    'Content-Type': 'application/x-www-form-urlencoded',
+		                    [csrfHeader]: csrfToken   // Spring Security requiere el header CSRF en fetch
+		                },
+		                body: 'accion=' + accion
+		            })
+		            .then(r => r.json())
+		            .then(data => {
+		                if (data.success) {
+		                    mostrarNotificacion(mensajeExito + ' a las ' + data.hora, 'success', color);
+		                    setTimeout(() => window.location.reload(), 1500);
+		                } else {
+		                    mostrarNotificacion(data.message, 'error', 'red');
+		                    deshabilitarBotones(false);
+		                }
+		            })
+		            .catch(() => {
+		                mostrarNotificacion('Error al conectar con el servidor', 'error', 'red');
+		                deshabilitarBotones(false);
+		            });
+		        }
+
+		        // ── Notificaciones ────────────────────────────────────────────────────
+		        function mostrarNotificacion(mensaje, tipo, color) {
+		            const n = document.createElement('div');
+		            n.className = 'fixed top-4 right-4 px-6 py-4 rounded-lg shadow-lg text-white z-50 transform transition-all duration-500 translate-x-96';
+		            n.style.backgroundColor = color === 'green' ? '#10b981' : color === 'red' ? '#ef4444' : '#f59e0b';
+		            n.innerHTML = `
+		                <div class="flex items-center">
+		                    <svg class="h-6 w-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+		                        ${tipo === 'success'
+		                            ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>'
+		                            : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>'}
+		                    </svg>
+		                    <span class="font-semibold">${mensaje}</span>
+		                </div>`;
+		            document.body.appendChild(n);
+		            setTimeout(() => n.style.transform = 'translateX(0)', 100);
+		            setTimeout(() => {
+		                n.style.transform = 'translateX(400px)';
+		                setTimeout(() => document.body.removeChild(n), 500);
+		            }, 3000);
+		        }
+
+		        // ── Deshabilitar botones ──────────────────────────────────────────────
+		        function deshabilitarBotones(deshabilitar) {
+		            document.querySelectorAll('.btn-registro').forEach(btn => {
+		                btn.disabled = deshabilitar;
+		                btn.classList.toggle('opacity-50', deshabilitar);
+		                btn.classList.toggle('cursor-not-allowed', deshabilitar);
+		            });
+		        }
+		    </script>
+		</body>
+		</html>

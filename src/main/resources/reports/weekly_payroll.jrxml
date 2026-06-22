@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.21.3.final using JasperReports Library version 6.21.3-4a3078d20785ebe464f18037d738d12fc98c13cf  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="weekly_payroll" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="7cf4f794-fb4d-4a1d-a02b-a01047db377b">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
+	<parameter name="fechaInicio" class="java.lang.String"/>
+	<parameter name="fechaFin" class="java.lang.String"/>
+	<parameter name="totalPlanillas" class="java.lang.Long"/>
+	<parameter name="planillasPagadas" class="java.lang.Long"/>
+	<parameter name="planillasPendientes" class="java.lang.Long"/>
+	<parameter name="totalHorasBase" class="java.math.BigDecimal"/>
+	<parameter name="totalHorasExtra" class="java.math.BigDecimal"/>
+	<parameter name="totalPago" class="java.math.BigDecimal"/>
+	<field name="idPlanilla" class="java.lang.Integer"/>
+	<field name="nombreEmpleado" class="java.lang.String"/>
+	<field name="categoria" class="java.lang.String"/>
+	<field name="horasBase" class="java.math.BigDecimal"/>
+	<field name="horasExtra" class="java.math.BigDecimal"/>
+	<field name="totalPago" class="java.math.BigDecimal"/>
+	<field name="estado" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="145" splitType="Stretch">
+			<rectangle>
+				<reportElement x="0" y="0" width="555" height="70" backcolor="#004E89" uuid="2a563dbb-7ea1-4202-a16a-096b4ef84fb0"/>
+				<graphicElement>
+					<pen lineWidth="0.0"/>
+				</graphicElement>
+			</rectangle>
+			<staticText>
+				<reportElement x="15" y="10" width="220" height="30" forecolor="#FFFFFF" uuid="90ab5cc5-cb5e-4c74-a690-3cc1d56f34e6"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="20" isBold="true"/>
+				</textElement>
+				<text><![CDATA[ConstruPlan]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="15" y="40" width="220" height="20" forecolor="#FFD23F" uuid="8a6136d8-eb17-48f8-8ef5-9f58adbb504a"/>
+				<textElement>
+					<font fontName="SansSerif" size="10" isBold="true" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[Mano de Obra y Control de Planillas]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="270" y="20" width="270" height="35" forecolor="#FFFFFF" uuid="cdbf8345-dc6c-4874-9844-8d48a33504fb"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[REPORTE SEMANAL DE PLANILLAS]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="80" width="90" height="20" uuid="bc37dc87-f823-4f99-a86d-66e6b5efc1c9"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Periodo Semanal:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="95" y="80" width="200" height="20" uuid="7cf445a0-9759-4bbf-a7eb-ff441f71dfbc"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Del " + $P{fechaInicio} + " al " + $P{fechaFin}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="370" y="80" width="70" height="20" uuid="ca082c35-ffef-4933-9799-73fb6df18764"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[F. Emisión:]]></text>
+			</staticText>
+			<textField pattern="dd/MM/yyyy HH:mm">
+				<reportElement x="445" y="80" width="110" height="20" uuid="69a53696-613d-4c3e-862d-04ad4bcabf1a"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="0" y="105" width="555" height="1" forecolor="#CCCCCC" uuid="93ff4354-bc7f-4f2b-8a8b-3e5e4de4b407"/>
+			</line>
+			<rectangle>
+				<reportElement x="0" y="112" width="170" height="25" backcolor="#F3F4F6" uuid="e0e4abeb-a690-4824-a212-dbfbc746c59b"/>
+				<graphicElement>
+					<pen lineWidth="0.5" lineColor="#E5E7EB"/>
+				</graphicElement>
+			</rectangle>
+			<textField>
+				<reportElement x="5" y="112" width="160" height="25" uuid="5df84b2c-c82d-41a4-9457-36e7888c75df"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="9" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Total Planillas: " + $P{totalPlanillas}]]></textFieldExpression>
+			</textField>
+			<rectangle>
+				<reportElement x="185" y="112" width="180" height="25" backcolor="#F3F4F6" uuid="887c2fb2-4752-4752-b883-8a39e8ad996b"/>
+				<graphicElement>
+					<pen lineWidth="0.5" lineColor="#E5E7EB"/>
+				</graphicElement>
+			</rectangle>
+			<textField>
+				<reportElement x="190" y="112" width="170" height="25" uuid="ea69e20a-8bf8-47fb-867c-d68a98b4226f"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Horas Trabadas: " + $P{totalHorasBase} + " h / " + $P{totalHorasExtra} + " ext"]]></textFieldExpression>
+			</textField>
+			<rectangle>
+				<reportElement x="380" y="112" width="175" height="25" backcolor="#FF6B35" uuid="559d2983-faad-4089-a292-668b815fe608"/>
+				<graphicElement>
+					<pen lineWidth="0.0"/>
+				</graphicElement>
+			</rectangle>
+			<textField>
+				<reportElement x="385" y="112" width="165" height="25" forecolor="#FFFFFF" uuid="d6fba5dc-0d6c-48c0-8fe6-b4859a5d3f25"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Monto Neto: S/ " + $P{totalPago}]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="25" splitType="Stretch">
+			<rectangle>
+				<reportElement x="0" y="0" width="555" height="25" backcolor="#E5E7EB" uuid="df82c75a-cf2a-40a1-a6e5-4d2d634ea819"/>
+				<graphicElement>
+					<pen lineWidth="0.0"/>
+				</graphicElement>
+			</rectangle>
+			<staticText>
+				<reportElement x="5" y="0" width="55" height="25" uuid="2a8435d1-13ff-4e78-9e58-9a99bca8a6a2"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[ID]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="65" y="0" width="170" height="25" uuid="90feac63-4927-4a0b-8d7d-e592750e501a"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Empleado]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="240" y="0" width="75" height="25" uuid="16ad4fb4-fbfe-4712-bf9e-f0bca2d89b37"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Categoría]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="320" y="0" width="50" height="25" uuid="e03d4c06-03db-4cb8-9b88-82dfc70ca2b0"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[H. Base]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="375" y="0" width="50" height="25" uuid="b1bc2cf8-8ee5-4bfa-9ab5-d14f4946399c"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[H. Extra]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="430" y="0" width="65" height="25" uuid="6c25608d-8a21-4fa3-94c6-2182be5fa39b"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Importe (S/)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="500" y="0" width="50" height="25" uuid="88eef0d7-21a4-4f24-9b51-2cc677e48b83"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Estado]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="22" splitType="Stretch">
+			<line>
+				<reportElement x="0" y="21" width="555" height="1" forecolor="#F3F4F6" uuid="e622ef7c-1798-47d3-9bc6-37ca8d2ca0ce"/>
+			</line>
+			<textField>
+				<reportElement x="5" y="0" width="55" height="20" uuid="7cf4f794-fb4d-4a1d-a02b-a01047db377b"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA["#" + $F{idPlanilla}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="65" y="0" width="170" height="20" uuid="09d84a7e-128a-4933-bf40-fa9d6bf37418"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{nombreEmpleado}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="240" y="0" width="75" height="20" uuid="cdbf8345-dc6c-4874-9844-8d48a33504fb"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{categoria}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="320" y="0" width="50" height="20" uuid="30abdf8a-59b3-4632-bd9f-24d142ea84b5"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{horasBase}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="375" y="0" width="50" height="20" uuid="2bf834a0-fcbe-45f8-95d1-13ef5ca5b08c"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{horasExtra}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="430" y="0" width="65" height="20" uuid="88a82cf8-dfef-4011-8fe6-b4859a5d3f25"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{totalPago}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="500" y="0" width="50" height="20" uuid="df82c75a-cf2a-40a1-a6e5-4d2d634ea819"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{estado}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="25" splitType="Stretch">
+			<textField>
+				<reportElement x="420" y="5" width="90" height="20" uuid="bc289b37-a16a-4933-bf40-fa9d6bf37418"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Página " + $V{PAGE_NUMBER} + " de"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="515" y="5" width="40" height="20" uuid="e03d4c06-03db-4cb8-9b88-82dfc70ca2b0"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="5" width="250" height="20" forecolor="#999999" uuid="88eef0d7-21a4-4f24-9b51-2cc677e48b83"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="8" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[ConstruPlan - Reporte generado de forma automática]]></text>
+			</staticText>
+		</band>
+	</pageFooter>
+	<summary>
+		<band height="120" splitType="Stretch">
+			<line>
+				<reportElement x="50" y="80" width="180" height="1" forecolor="#999999" uuid="2d3b2a84-fbfe-4e78-9e58-9a99bca8a6a2"/>
+			</line>
+			<staticText>
+				<reportElement x="50" y="85" width="180" height="25" uuid="5df84b2c-c82d-41a4-9457-36e7888c75df"/>
+				<textElement textAlignment="Center" verticalAlignment="Top">
+					<font fontName="SansSerif" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Elaborado por
+Oficina Técnica]]></text>
+			</staticText>
+			<line>
+				<reportElement x="325" y="80" width="180" height="1" forecolor="#999999" uuid="ca082c35-ffef-4933-9799-73fb6df18764"/>
+			</line>
+			<staticText>
+				<reportElement x="325" y="85" width="180" height="25" uuid="ea69e20a-8bf8-47fb-867c-d68a98b4226f"/>
+				<textElement textAlignment="Center" verticalAlignment="Top">
+					<font fontName="SansSerif" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Revisado por
+Administración de Obra]]></text>
+			</staticText>
+		</band>
+	</summary>
+</jasperReport>
