@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${action == 'update'} ? 'Editar Meta - ConstruPlan' : 'Nueva Meta - ConstruPlan'"></title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: { extend: { colors: { primary: '#004E89', secondary: '#FF6B35', accent: '#FFD23F' } } }
+        }
+    </script>
+</head>
+<body class="bg-gray-50">
+
+    <div th:replace="~{fragments/navbar :: navbar('metas')}"></div>
+
+    <div class="max-w-4xl mx-auto py-6 sm:px-6 lg:px-8">
+
+        <!-- Breadcrumb -->
+        <div class="px-4 mb-6">
+            <nav class="flex">
+                <ol class="flex items-center space-x-2">
+                    <li>
+                        <a th:href="@{/campo/dashboard}" class="text-gray-500 hover:text-gray-700">
+                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/>
+                            </svg>
+                        </a>
+                    </li>
+                    <li class="flex items-center">
+                        <svg class="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+                        </svg>
+                        <a th:href="@{/campo/metas}" class="ml-2 text-gray-500 hover:text-gray-700">Metas</a>
+                    </li>
+                    <li class="flex items-center">
+                        <svg class="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+                        </svg>
+                        <span class="ml-2 text-gray-700 font-medium"
+                              th:text="${action == 'update'} ? 'Editar' : 'Nueva'"></span>
+                    </li>
+                </ol>
+            </nav>
+        </div>
+
+        <!-- Header -->
+        <div class="px-4 mb-6">
+            <h1 class="text-3xl font-bold text-gray-900"
+                th:text="${action == 'update'} ? 'Editar Meta' : 'Nueva Meta'"></h1>
+            <p class="mt-2 text-sm text-gray-600"
+               th:text="${action == 'update'} ? 'Modifica los datos de la meta' : 'Define una nueva meta de producción para una tarea'"></p>
+        </div>
+
+        <!-- Error -->
+        <div th:if="${error}" class="px-4 mb-6">
+            <div class="bg-red-50 border-l-4 border-red-400 p-4 rounded flex items-start">
+                <svg class="h-5 w-5 text-red-400 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                </svg>
+                <p class="ml-3 text-sm text-red-700" th:text="${error}"></p>
+            </div>
+        </div>
+
+        <!-- Formulario -->
+        <div class="px-4">
+            <form th:action="${action == 'update'} ? @{/campo/metas/{id}(id=${meta.idMeta})} : @{/campo/metas}"
+                  method="post"
+                  id="metaForm"
+                  class="bg-white shadow rounded-lg p-6">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+                <div class="space-y-6">
+
+                    <!-- Tarea -->
+                    <div>
+                        <label for="idTarea" class="block text-sm font-medium text-gray-700 mb-2">
+                            Tarea <span class="text-red-500">*</span>
+                        </label>
+                        <select id="idTarea" name="idTarea" required
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition">
+                            <option value="">Seleccione una tarea</option>
+                            <option th:each="t : ${tareas}"
+                                    th:value="${t.idTarea}"
+                                    th:text="${t.nombre} + ' (' + ${t.unidadMedida} + ')'"
+                                    th:selected="${tareaSeleccionada != null and tareaSeleccionada.idTarea == t.idTarea}">
+                            </option>
+                        </select>
+                        <p class="mt-1 text-sm text-gray-500"
+                           th:text="${action == 'update'} ? 'No se puede cambiar la tarea de una meta existente' : 'Seleccione la tarea para esta meta'"></p>
+                    </div>
+
+                    <!-- Cantidad -->
+                    <div>
+                        <label for="cantidad" class="block text-sm font-medium text-gray-700 mb-2">
+                            Cantidad de Producción <span class="text-red-500">*</span>
+                        </label>
+                        <div class="relative rounded-md shadow-sm">
+                            <input type="number"
+                                   id="cantidad"
+                                   name="cantidad"
+                                   th:value="${meta != null and meta.cantidad > 0} ? ${#numbers.formatDecimal(meta.cantidad, 1, 2)} : ''"
+                                   required step="0.01" min="0.01"
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition"
+                                   placeholder="Ej: 100.00">
+                            <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                <span id="unidadSpan" class="text-gray-500 sm:text-sm"
+                                      th:text="${tareaSeleccionada != null} ? ${tareaSeleccionada.unidadMedida} : 'unidades'"></span>
+                            </div>
+                        </div>
+                        <p class="mt-1 text-sm text-gray-500">Cantidad esperada de producción</p>
+                    </div>
+
+                    <!-- Horas Equivalentes -->
+                    <div>
+                        <label for="horasEquivalentes" class="block text-sm font-medium text-gray-700 mb-2">
+                            Horas Equivalentes <span class="text-red-500">*</span>
+                        </label>
+                        <div class="relative rounded-md shadow-sm">
+                            <input type="number"
+                                   id="horasEquivalentes"
+                                   name="horasEquivalentes"
+                                   th:value="${meta != null and meta.horasEquivalentes > 0} ? ${#numbers.formatDecimal(meta.horasEquivalentes, 1, 2)} : ''"
+                                   required step="0.01" min="0.01"
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition"
+                                   placeholder="Ej: 8.00">
+                            <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                <span class="text-gray-500 sm:text-sm">horas</span>
+                            </div>
+                        </div>
+                        <p class="mt-1 text-sm text-gray-500">Tiempo estimado para completar la cantidad especificada</p>
+                    </div>
+
+                    <!-- Eficiencia en tiempo real -->
+                    <div id="eficienciaContainer" class="bg-gray-50 p-4 rounded-lg hidden">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <span class="text-sm font-medium text-gray-700">Eficiencia:</span>
+                                <span id="eficienciaTexto" class="ml-2 text-sm font-bold"></span>
+                            </div>
+                            <div class="w-32 bg-gray-200 rounded-full h-2">
+                                <div id="eficienciaBarra" class="bg-primary h-2 rounded-full"></div>
+                            </div>
+                        </div>
+                        <p id="eficienciaDescripcion" class="mt-2 text-xs text-gray-500"></p>
+                    </div>
+
+                    <!-- Es Principal -->
+                    <div>
+                        <label class="flex items-center cursor-pointer">
+                            <input type="checkbox"
+                                   name="esLibre"
+                                   id="esLibre"
+                                   th:checked="${meta != null and meta.libre}"
+                                   class="w-5 h-5 text-primary border-gray-300 rounded focus:ring-primary">
+                            <span class="ml-3 text-sm font-medium text-gray-700">Meta Principal</span>
+                        </label>
+                        <p class="mt-1 ml-8 text-sm text-gray-500">
+                            La meta principal será la seleccionada por defecto al asignar la tarea
+                        </p>
+                    </div>
+
+                    <!-- Info -->
+                    <div class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded">
+                        <div class="flex">
+                            <svg class="h-5 w-5 text-blue-400 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                            </svg>
+                            <div class="ml-3">
+                                <h3 class="text-sm font-medium text-blue-800">Recomendaciones</h3>
+                                <ul class="mt-2 text-sm text-blue-700 list-disc list-inside space-y-1">
+                                    <li>Una tarea debe tener al menos una meta principal</li>
+                                    <li>La eficiencia ideal está entre 80% y 120%</li>
+                                    <li>Menos del 80% puede indicar metas muy exigentes</li>
+                                    <li>Más del 120% puede indicar metas muy fáciles</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Botones -->
+                <div class="mt-8 flex items-center justify-end space-x-4">
+                    <a th:href="@{/campo/metas}"
+                       class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition font-medium">
+                        Cancelar
+                    </a>
+                    <button type="submit"
+                            class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-blue-800 transition font-medium flex items-center">
+                        <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path th:if="${action == 'update'}"
+                                  stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            <path th:unless="${action == 'update'}"
+                                  stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                        </svg>
+                        <span th:text="${action == 'update'} ? 'Actualizar Meta' : 'Crear Meta'"></span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div th:replace="~{fragments/footer :: footer}"></div>
+
+    <script th:inline="javascript">
+        // Mapa tarea → unidad para actualizar el span dinámicamente
+        const tareasUnidades = {
+            /*[# th:each="t : ${tareas}"]*/
+            [(${t.idTarea})]: '[(${t.unidadMedida})]',
+            /*[/]*/
+        };
+
+        document.getElementById('idTarea').addEventListener('change', function() {
+            const unidad = tareasUnidades[this.value] || 'unidades';
+            document.getElementById('unidadSpan').textContent = unidad;
+        });
+
+        const cantidadInput       = document.getElementById('cantidad');
+        const horasInput          = document.getElementById('horasEquivalentes');
+        const eficienciaContainer = document.getElementById('eficienciaContainer');
+        const eficienciaTexto     = document.getElementById('eficienciaTexto');
+        const eficienciaBarra     = document.getElementById('eficienciaBarra');
+        const eficienciaDesc      = document.getElementById('eficienciaDescripcion');
+
+        function calcularEficiencia() {
+            const cantidad = parseFloat(cantidadInput.value) || 0;
+            const horas    = parseFloat(horasInput.value)    || 0;
+            if (cantidad > 0 && horas > 0) {
+                const ef = (horas / cantidad) * 100;
+                eficienciaContainer.classList.remove('hidden');
+                eficienciaTexto.textContent = ef.toFixed(1) + '%';
+                eficienciaBarra.style.width = Math.min(100, ef) + '%';
+                if (ef <= 100) {
+                    eficienciaTexto.className = 'ml-2 text-sm font-bold text-green-600';
+                    eficienciaBarra.className = 'bg-green-500 h-2 rounded-full';
+                    eficienciaDesc.textContent = 'Buena eficiencia: La meta es alcanzable';
+                } else if (ef <= 120) {
+                    eficienciaTexto.className = 'ml-2 text-sm font-bold text-yellow-600';
+                    eficienciaBarra.className = 'bg-yellow-500 h-2 rounded-full';
+                    eficienciaDesc.textContent = 'Eficiencia aceptable: Considerar ajustar';
+                } else {
+                    eficienciaTexto.className = 'ml-2 text-sm font-bold text-red-600';
+                    eficienciaBarra.className = 'bg-red-500 h-2 rounded-full';
+                    eficienciaDesc.textContent = 'Baja eficiencia: La meta puede ser muy exigente';
+                }
+            } else {
+                eficienciaContainer.classList.add('hidden');
+            }
+        }
+
+        cantidadInput.addEventListener('input', calcularEficiencia);
+        horasInput.addEventListener('input', calcularEficiencia);
+        calcularEficiencia(); // calcular al cargar si hay valores (edición)
+
+        document.getElementById('metaForm').addEventListener('submit', function(e) {
+            if (!document.getElementById('idTarea').value) {
+                e.preventDefault(); alert('Debe seleccionar una tarea.'); return;
+            }
+            const cantidad = parseFloat(cantidadInput.value);
+            if (isNaN(cantidad) || cantidad <= 0) {
+                e.preventDefault(); alert('La cantidad debe ser mayor a cero.'); cantidadInput.focus(); return;
+            }
+            const horas = parseFloat(horasInput.value);
+            if (isNaN(horas) || horas <= 0) {
+                e.preventDefault(); alert('Las horas equivalentes deben ser mayores a cero.'); horasInput.focus();
+            }
+        });
+    </script>
+</body>
+</html>

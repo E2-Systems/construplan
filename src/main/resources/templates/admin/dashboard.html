@@ -1,7 +1,228 @@
-<form th:action="@{/logout}" method="post" class="ml-4">
-                       <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-                       <button type="submit"
-                               class="px-4 py-2 rounded-md text-sm font-medium bg-red-600 text-white hover:bg-red-700 transition">
-                           Cerrar Sesión
-                       </button>
-                   </form>
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Administrador - ConstruPlan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: { extend: { colors: { primary: '#004E89', secondary: '#FF6B35', accent: '#FFD23F' } } }
+        }
+    </script>
+</head>
+<body class="bg-gray-50">
+
+    <div th:replace="~{fragments/navbar :: navbar('dashboard')}"></div>
+
+    <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+
+        <!-- Header -->
+        <div class="px-4 py-6 sm:px-0">
+            <h1 class="text-3xl font-bold text-gray-900">Panel de Administración</h1>
+            <p class="mt-2 text-sm text-gray-600">
+                Bienvenido, <span th:text="${#authentication.name}"></span>. Gestiona el sistema desde aquí.
+            </p>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+
+            <div class="bg-white overflow-hidden shadow rounded-lg hover:shadow-lg transition">
+                <div class="p-5 flex items-center">
+                    <svg class="h-8 w-8 text-primary flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+                    </svg>
+                    <div class="ml-5">
+                        <p class="text-sm font-medium text-gray-500">Total Usuarios</p>
+                        <p class="text-3xl font-semibold text-gray-900" th:text="${totalUsuarios}"></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white overflow-hidden shadow rounded-lg hover:shadow-lg transition">
+                <div class="p-5 flex items-center">
+                    <svg class="h-8 w-8 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <div class="ml-5">
+                        <p class="text-sm font-medium text-gray-500">Usuarios Activos</p>
+                        <p class="text-3xl font-semibold text-green-600" th:text="${usuariosActivos}"></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white overflow-hidden shadow rounded-lg hover:shadow-lg transition">
+                <div class="p-5 flex items-center">
+                    <svg class="h-8 w-8 text-red-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <div class="ml-5">
+                        <p class="text-sm font-medium text-gray-500">Usuarios Inactivos</p>
+                        <p class="text-3xl font-semibold text-red-600" th:text="${usuariosInactivos}"></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white overflow-hidden shadow rounded-lg hover:shadow-lg transition">
+                <div class="p-5 flex items-center">
+                    <svg class="h-8 w-8 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                    </svg>
+                    <div class="ml-5">
+                        <p class="text-sm font-medium text-gray-500">Empleados</p>
+                        <p class="text-3xl font-semibold text-blue-600" th:text="${countEmpleados}"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Distribución por Roles -->
+        <div class="mt-8 bg-white shadow rounded-lg p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Distribución por Roles</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="border-l-4 border-blue-500 pl-4">
+                    <p class="text-sm text-gray-600">Empleados</p>
+                    <p class="text-2xl font-bold text-blue-600" th:text="${countEmpleados}"></p>
+                </div>
+                <div class="border-l-4 border-yellow-500 pl-4">
+                    <p class="text-sm text-gray-600">Ingenieros de Campo</p>
+                    <p class="text-2xl font-bold text-yellow-600" th:text="${countCampo}"></p>
+                </div>
+                <div class="border-l-4 border-purple-500 pl-4">
+                    <p class="text-sm text-gray-600">Ingenieros de Oficina</p>
+                    <p class="text-2xl font-bold text-purple-600" th:text="${countOficina}"></p>
+                </div>
+                <div class="border-l-4 border-red-500 pl-4">
+                    <p class="text-sm text-gray-600">Administradores</p>
+                    <p class="text-2xl font-bold text-red-600" th:text="${countAdmin}"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Acciones Rápidas -->
+        <div class="mt-8 bg-white shadow rounded-lg p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Acciones Rápidas</h2>
+           
+				<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <a th:href="@{/admin/usuarios/nuevo}"
+                   class="flex items-center p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-primary hover:bg-blue-50 transition">
+                    <svg class="h-10 w-10 text-primary mr-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+                    </svg>
+                    <div>
+                        <h3 class="font-semibold text-gray-900">Crear Usuario</h3>
+                        <p class="text-sm text-gray-600">Agregar nuevo usuario al sistema</p>
+                    </div>
+                </a>
+                <a th:href="@{/admin/empleados/nuevo}"
+                   class="flex items-center p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-primary hover:bg-blue-50 transition">
+                    <svg class="h-10 w-10 text-primary mr-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                    </svg>
+                    <div>
+                        <h3 class="font-semibold text-gray-900">Registrar Empleado</h3>
+                        <p class="text-sm text-gray-600">Agregar nuevo empleado</p>
+                    </div>
+                </a>
+				<a th:href="@{/admin/proyectos}"
+				                   class="flex items-center p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-primary hover:bg-blue-50 transition">
+				                   <svg class="h-10 w-10 text-primary mr-4 flex-shrink-0" fill="none" stroke="currentColor"
+				                       viewBox="0 0 24 24">
+				                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+				                           d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+				                   </svg>
+				                   <div>
+				                       <h3 class="font-semibold text-gray-900">Gestionar Proyectos</h3>
+				                       <p class="text-sm text-gray-600">Administrar obras y estados</p>
+				                   </div>
+				               </a>
+                <a th:href="@{/admin/reportes}"
+                   class="flex items-center p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-primary hover:bg-blue-50 transition">
+                    <svg class="h-10 w-10 text-primary mr-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                    <div>
+                        <h3 class="font-semibold text-gray-900">Ver Reportes</h3>
+                        <p class="text-sm text-gray-600">Acceder a reportes del sistema</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- Tabla usuarios recientes — solo 5 -->
+        <div class="mt-8 bg-white shadow rounded-lg overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                <h2 class="text-lg font-semibold text-gray-900">Usuarios Registrados</h2>
+                <a th:href="@{/admin/usuarios}" class="text-sm text-primary hover:text-blue-800 font-medium">
+                    Ver todos →
+                </a>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Usuario</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rol</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fecha Creación</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <tr th:each="u, iter : ${usuarios}" th:if="${iter.index < 5}" class="hover:bg-gray-50">
+
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="h-10 w-10 rounded-full bg-primary text-white flex items-center justify-center font-bold flex-shrink-0"
+                                         th:text="${#strings.toUpperCase(#strings.substring(u.username,0,1))}"></div>
+                                    <div class="ml-4">
+                                        <div class="text-sm font-medium text-gray-900" th:text="${u.username}"></div>
+                                        <div class="text-sm text-gray-500" th:text="'ID: ' + ${u.id}"></div>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span th:text="${u.rol.descripcion}"
+                                      th:classappend="${u.rol.name() == 'ADMIN'}    ? 'bg-red-100 text-red-800' :
+                                                      (${u.rol.name() == 'OFICINA'} ? 'bg-purple-100 text-purple-800' :
+                                                      (${u.rol.name() == 'CAMPO'}   ? 'bg-yellow-100 text-yellow-800' :
+                                                       'bg-blue-100 text-blue-800'))"
+                                      class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full">
+                                </span>
+                            </td>
+
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span th:if="${u.activo}"
+                                      class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Activo</span>
+                                <span th:unless="${u.activo}"
+                                      class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Inactivo</span>
+                            </td>
+
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
+                                th:text="${u.fechaCreacion != null} ? ${#temporals.format(u.fechaCreacion, 'dd/MM/yyyy')} : 'N/A'"></td>
+
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <a th:href="@{/admin/usuarios/{id}/editar(id=${u.id})}"
+                                   class="text-primary hover:text-blue-900 mr-3">Editar</a>
+                                <form th:action="@{/admin/usuarios/{id}/estado(id=${u.id})}"
+                                      method="post" class="inline">
+                                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                                    <input type="hidden" name="activo" th:value="${!u.activo}"/>
+                                    <button type="submit"
+                                            th:class="${u.activo} ? 'text-orange-600 hover:text-orange-900' : 'text-green-600 hover:text-green-900'"
+                                            th:text="${u.activo} ? 'Desactivar' : 'Activar'">
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

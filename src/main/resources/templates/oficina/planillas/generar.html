@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generar Planillas - ConstruPlan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#004E89',
+                        secondary: '#FF6B35',
+                        accent: '#FFD23F',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-gray-50 flex flex-col min-h-screen">
+
+    <!-- Navbar -->
+    <div th:replace="~{fragments/navbar :: navbar('planillas')}"></div>
+
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 mt-10 w-full flex-grow">
+        <!-- Mensajes flash -->
+        <div class="mb-4" th:if="${error}">
+            <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg shadow-sm" role="alert">
+                <span class="block sm:inline font-medium" th:text="${error}"></span>
+            </div>
+        </div>
+
+        <!-- Tarjeta del Formulario -->
+        <div class="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden">
+            <!-- Encabezado de la Tarjeta -->
+            <div class="bg-gradient-to-r from-primary to-blue-800 px-6 py-5 text-white">
+                <h2 class="text-xl font-bold">Generación de Planilla Semanal</h2>
+                <p class="text-xs text-blue-100 mt-1">
+                    Cierre administrativo y cálculo masivo de remuneraciones en base a asistencias aprobadas en campo.
+                </p>
+            </div>
+
+            <!-- Cuerpo del Formulario -->
+            <form th:action="@{/oficina/planillas/generar}" method="post" class="p-6 space-y-6">
+                <!-- Información de ayuda -->
+                <div class="bg-blue-50 border border-blue-100 text-blue-800 p-4 rounded-xl text-xs space-y-2">
+                    <p class="font-bold">⚠️ Información Importante:</p>
+                    <ul class="list-disc pl-4 space-y-1">
+                        <li>Debe seleccionar el **Día Lunes** de la semana que desea liquidar.</li>
+                        <li>El sistema calculará automáticamente el periodo de 6 días laborales (Lunes a Sábado).</li>
+                        <li>Solo se procesarán las asistencias diarias que hayan sido previamente **APROBADAS** por el supervisor de Campo.</li>
+                        <li>Las planillas duplicadas para el mismo empleado en el mismo rango de fechas serán omitidas automáticamente para evitar dobles pagos.</li>
+                    </ul>
+                </div>
+
+                <!-- Campo de Fecha -->
+                <div class="space-y-2">
+                    <label for="fechaInicio" class="block text-sm font-semibold text-gray-700">
+                        Fecha de Inicio de Semana (Lunes)
+                    </label>
+                    <input type="date" id="fechaInicio" name="fechaInicio" 
+                           th:value="${fechaSugerida}"
+                           required
+                           class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition text-sm font-medium text-gray-700 shadow-sm" />
+                </div>
+
+                <!-- Botones de Acción -->
+                <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+                    <a th:href="@{/oficina/planillas}" 
+                       class="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl transition text-sm font-semibold">
+                        Cancelar
+                    </a>
+                    <button type="submit" 
+                            class="px-6 py-2.5 bg-primary hover:bg-blue-800 text-white rounded-xl shadow-md hover:shadow-lg transition duration-150 text-sm font-bold flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                        </svg>
+                        Iniciar Procesamiento Masivo
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div th:replace="~{fragments/footer :: footer}"></div>
+
+    <script>
+        // Validación en frontend para guiar al usuario a seleccionar un lunes
+        document.querySelector('form').addEventListener('submit', function (e) {
+            const inputFecha = document.getElementById('fechaInicio');
+            if (inputFecha.value) {
+                // Agregar la zona horaria local al crear el objeto fecha para evitar desfase de UTC
+                const parts = inputFecha.value.split('-');
+                const dateSelected = new Date(parts[0], parts[1] - 1, parts[2]);
+                const day = dateSelected.getDay(); // 0 es Domingo, 1 es Lunes...
+                
+                if (day !== 1) {
+                    e.preventDefault();
+                    alert("Por favor, seleccione un día que corresponda a un Lunes.");
+                }
+            }
+        });
+    </script>
+
+</body>
+
+</html>

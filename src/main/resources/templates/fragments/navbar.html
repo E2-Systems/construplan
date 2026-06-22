@@ -26,7 +26,9 @@
                         <a th:href="@{/empleado/dashboard}"
                            th:classappend="${active == 'dashboard'} ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100'"
                            class="px-3 py-2 rounded-md text-sm font-medium">Inicio</a>
-
+						   <a th:href="@{/empleado/perfil}"
+						                             th:classappend="${active == 'perfil'} ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100'"
+						                             class="px-3 py-2 rounded-md text-sm font-medium">Mi Perfil</a>
                         <a th:href="@{/empleado/jornada}"
                            th:classappend="${active == 'jornada'} ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100'"
                            class="px-3 py-2 rounded-md text-sm font-medium">Mi Jornada</a>
@@ -50,9 +52,7 @@
                            th:classappend="${active == 'dashboard'} ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100'"
                            class="px-3 py-2 rounded-md text-sm font-medium">Inicio</a>
 
-                        <a th:href="@{/campo/proyectos}"
-                           th:classappend="${active == 'proyectos'} ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100'"
-                           class="px-3 py-2 rounded-md text-sm font-medium">Proyectos</a>
+                       
 
                         <a th:href="@{/campo/tareas}"
                            th:classappend="${active == 'tareas'} ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100'"
@@ -89,15 +89,18 @@
                            th:classappend="${active == 'sueldos'} ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100'"
                            class="px-3 py-2 rounded-md text-sm font-medium">Sueldos</a>
 
-                        <a th:href="@{/planillas}"
+                     <a th:href="@{/oficina/planillas}"
                            th:classappend="${active == 'planillas'} ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100'"
                            class="px-3 py-2 rounded-md text-sm font-medium">Planillas</a>
 
-                        <a th:href="@{/ajustes}"
+                     <a th:href="@{/oficina/ajustes}"
                            th:classappend="${active == 'ajustes'} ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100'"
                            class="px-3 py-2 rounded-md text-sm font-medium">Ajustes</a>
 
-                        <a th:href="@{/reportes}"
+						   <a th:href="@{/tickets}"
+						                             th:classappend="${active == 'tickets'} ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100'"
+						                             class="px-3 py-2 rounded-md text-sm font-medium">Tickets</a>
+						     <a th:href="@{/reportes}"
                            th:classappend="${active == 'reportes'} ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100'"
                            class="px-3 py-2 rounded-md text-sm font-medium">Reportes</a>
                     </th:block>
@@ -115,7 +118,9 @@
                         <a th:href="@{/admin/empleados}"
                            th:classappend="${active == 'empleados'} ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100'"
                            class="px-3 py-2 rounded-md text-sm font-medium">Empleados</a>
-
+						   <a th:href="@{/admin/proyectos}"
+						                         th:classappend="${active == 'proyectos'} ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100'"
+						                         class="px-3 py-2 rounded-md text-sm font-medium">Proyectos</a>
                         <a th:href="@{/admin/configuracion}"
                            th:classappend="${active == 'configuracion'} ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100'"
                            class="px-3 py-2 rounded-md text-sm font-medium">Configuración</a>

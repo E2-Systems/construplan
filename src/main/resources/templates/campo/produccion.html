@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Producción Física y Rendimiento - ConstruPlan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#004E89',
+                        secondary: '#FF6B35',
+                        accent: '#FFD23F',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 flex flex-col min-h-screen">
+
+    <!-- Navbar -->
+    <div th:replace="~{fragments/navbar :: navbar('produccion')}"></div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 w-full flex-grow mb-8">
+
+        <!-- Encabezado -->
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Rendimiento y Producción Física</h1>
+                <p class="text-sm text-gray-600 mt-1">
+                    Control del avance de metas semanales en obras y eficiencia operativa del personal de construcción.
+                </p>
+            </div>
+            <div class="mt-4 md:mt-0">
+                <a th:href="@{/campo/dashboard}"
+                    class="px-4 py-2.5 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition text-sm font-semibold flex items-center shadow-sm">
+                    ← Volver al Dashboard
+                </a>
+            </div>
+        </div>
+
+        <!-- Selector de Semana -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 mb-6">
+            <form th:action="@{/campo/produccion}" method="get" class="flex flex-col sm:flex-row items-end gap-4">
+                <div class="flex-grow">
+                    <label for="selectSemana" class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">
+                        Seleccionar Lunes de Inicio de Semana
+                    </label>
+                    <input type="date" id="selectSemana" name="semana"
+                           th:value="${semanaSeleccionada}"
+                           class="block w-full sm:w-72 rounded-lg border-gray-300 shadow-sm focus:ring-primary focus:border-primary text-sm font-medium text-gray-800 py-2 px-3 border">
+                </div>
+                <button type="submit"
+                        class="px-5 py-2.5 bg-primary hover:bg-blue-800 text-white rounded-lg shadow transition duration-150 text-sm font-semibold flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                    Consultar
+                </button>
+            </form>
+        </div>
+
+        <!-- Panel principal: Solo visible si hay asignaciones en la semana -->
+        <div th:if="${totalTareas > 0}">
+
+            <!-- Tarjetas de KPIs Globales -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
+                <!-- Total Asignaciones -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 hover:shadow-md transition">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Metas Asignadas</p>
+                            <p class="text-3xl font-black text-gray-900 mt-1" th:text="${totalTareas}">0</p>
+                        </div>
+                        <div class="bg-blue-100 rounded-xl p-3">
+                            <svg class="h-7 w-7 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-3">Para el periodo de la semana</p>
+                </div>
+
+                <!-- Tareas Completadas -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 hover:shadow-md transition">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Metas Logradas</p>
+                            <p class="text-3xl font-black text-green-600 mt-1" th:text="${tareasCompletadas}">0</p>
+                        </div>
+                        <div class="bg-green-100 rounded-xl p-3">
+                            <svg class="h-7 w-7 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-3">Metas cerradas físicamente</p>
+                </div>
+
+                <!-- Eficiencia Global -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 hover:shadow-md transition">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Eficiencia Global</p>
+                            <p class="text-3xl font-black text-secondary mt-1" th:text="${eficienciaGlobal} + '%'"></p>
+                        </div>
+                        <div class="bg-orange-100 rounded-xl p-3">
+                            <svg class="h-7 w-7 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-3">Promedio de logro semanal</p>
+                </div>
+
+                <!-- Horas Físicas Acumuladas -->
+                <div class="bg-gradient-to-br from-primary to-blue-900 rounded-2xl shadow-md p-5 text-white hover:shadow-lg transition">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-bold text-blue-200 uppercase tracking-wider">Horas Físicas Logradas</p>
+                            <p class="text-3xl font-black text-accent mt-1" th:text="${horasFisicas} + ' H.F.'"></p>
+                        </div>
+                        <div class="bg-white/10 rounded-xl p-3 border border-white/10">
+                            <svg class="h-7 w-7 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <p class="text-xs text-blue-200 mt-3 font-medium">Equivalente de producción en horas</p>
+                </div>
+            </div>
+
+            <!-- Avance de Proyectos y Ranking de Rendimiento -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                <!-- Avance por Obra / Proyecto -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4 border-b border-gray-100 pb-2">Avance por Proyecto</h3>
+                    <div class="space-y-5">
+                        <div th:each="ap : ${avancesProyectos}">
+                            <div class="flex justify-between items-center text-sm font-semibold text-gray-800 mb-1.5">
+                                <span th:text="${ap.nombreProyecto}">Obra Principal</span>
+                                <span th:text="${ap.porcentajeAvance} + '%' + ' (' + ${ap.totalCompletadas} + '/' + ${ap.totalAsignadas} + ')'" class="text-primary">0%</span>
+                            </div>
+                            <div class="w-full bg-gray-100 rounded-full h-3 overflow-hidden shadow-inner border border-gray-100">
+                                <div class="bg-primary h-3 rounded-full transition-all duration-500"
+                                     th:style="'width: ' + ${ap.porcentajeAvance} + '%'">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ranking de Rendimiento del Personal -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4 border-b border-gray-100 pb-2">Rendimiento de Operarios</h3>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-100 text-sm">
+                            <thead>
+                                <tr class="text-gray-400 font-bold">
+                                    <th class="pb-2 text-left">Empleado</th>
+                                    <th class="pb-2 text-center">Asignadas</th>
+                                    <th class="pb-2 text-center">Logradas</th>
+                                    <th class="pb-2 text-right">Efectividad</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100 text-gray-700 font-medium">
+                                <tr th:each="r, iter : ${rendimientosEmpleados}" class="align-middle">
+                                    <td class="py-2.5 flex items-center gap-2">
+                                        <span th:text="${iter.count}" class="w-5 h-5 flex items-center justify-center bg-gray-100 rounded-full text-xs font-bold text-gray-500">1</span>
+                                        <span th:text="${r.nombreCompleto}" class="font-semibold text-gray-900">Juan Pérez</span>
+                                    </td>
+                                    <td class="py-2.5 text-center" th:text="${r.tareasAsignadas}">0</td>
+                                    <td class="py-2.5 text-center text-green-600 font-bold" th:text="${r.tareasCompletadas}">0</td>
+                                    <td class="py-2.5 text-right font-black">
+                                        <span th:text="${r.porcentajeRendimiento} + '%'"
+                                              th:class="${r.porcentajeRendimiento >= 80 ? 'text-green-600' : (r.porcentajeRendimiento >= 50 ? 'text-amber-600' : 'text-red-600')}">
+                                            100%
+                                        </span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabla de Actividades y Metas Semanales -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden mb-8">
+                <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
+                    <h3 class="text-base font-bold text-gray-900">Listado de Metas Planificadas de la Semana: <span th:text="${periodoTexto}" class="text-primary"></span></h3>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Fecha</th>
+                                <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Proyecto</th>
+                                <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Empleado</th>
+                                <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Tarea / Actividad</th>
+                                <th class="px-6 py-4 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">Meta Física</th>
+                                <th class="px-6 py-4 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">Estado</th>
+                                <th class="px-6 py-4 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">Hora de Cierre</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-100 text-sm">
+                            <tr th:each="a : ${asignaciones}" class="hover:bg-gray-50/50 transition">
+                                <!-- Fecha -->
+                                <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-950"
+                                    th:text="${#temporals.format(a.fecha, 'dd/MM/yyyy')}">16/06/2026</td>
+                                
+                                <!-- Proyecto -->
+                                <td class="px-6 py-4 whitespace-nowrap text-gray-700 font-medium"
+                                    th:text="${a.proyecto.nombre}">Las Acacias</td>
+
+                                <!-- Empleado -->
+                                <td class="px-6 py-4 whitespace-nowrap text-gray-900 font-semibold"
+                                    th:text="${a.empleado.nombreCompleto}">Juan Pérez</td>
+
+                                <!-- Tarea -->
+                                <td class="px-6 py-4 text-gray-600"
+                                    th:text="${a.meta.tarea.nombre}">Instalación de tuberías</td>
+
+                                <!-- Meta Física -->
+                                <td class="px-6 py-4 whitespace-nowrap text-center text-gray-800 font-bold"
+                                    th:text="${#numbers.formatDecimal(a.meta.cantidad, 1, 0)} + ' ' + ${a.meta.tarea.unidadMedida}">
+                                    50 Metros
+                                </td>
+
+                                <!-- Estado -->
+                                <td class="px-6 py-4 whitespace-nowrap text-center">
+                                    <span th:if="${a.horaMetaCompletada != null}" 
+                                          class="px-2.5 py-1 inline-flex text-xs leading-5 font-extrabold rounded-full bg-green-100 text-green-800 border border-green-200">
+                                        COMPLETADA
+                                    </span>
+                                    <span th:if="${a.horaMetaCompletada == null}" 
+                                          class="px-2.5 py-1 inline-flex text-xs leading-5 font-extrabold rounded-full bg-amber-100 text-amber-800 border border-amber-200">
+                                        PLANIFICADA
+                                    </span>
+                                </td>
+
+                                <!-- Hora de Cierre -->
+                                <td class="px-6 py-4 whitespace-nowrap text-center text-gray-500 font-medium"
+                                    th:text="${a.horaMetaCompletada != null ? a.horaMetaCompletada : '—'}">16:30</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Estado vacío: No hay asignaciones registradas para la semana -->
+        <div th:if="${totalTareas == 0}" class="bg-white rounded-2xl shadow-sm border border-gray-200 p-12 text-center mb-8">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-gray-300 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+            </svg>
+            <h3 class="text-lg font-bold text-gray-600 mb-2">Sin registros de producción</h3>
+            <p class="text-sm text-gray-400 mb-6">No se registran asignaciones de metas ni avances de producción para la semana seleccionada.</p>
+            <a th:href="@{/campo/asignaciones/nueva}"
+               class="inline-flex items-center gap-2 px-5 py-2.5 bg-primary hover:bg-blue-800 text-white rounded-lg shadow transition text-sm font-semibold">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+                Asignar Primera Tarea
+            </a>
+        </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div th:replace="~{fragments/footer :: footer}"></div>
+
+</body>
+</html>

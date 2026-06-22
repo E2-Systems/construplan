@@ -15,9 +15,8 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
+import com.construplan.admin.service.UsuarioDetailsService;
 import com.construplan.model.entity.Rol;
-
-import com.construplan.service.UsuarioDetailsService;
 
 @Configuration
 @EnableWebSecurity

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>500 - Error del servidor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-red-50 to-red-100 flex items-center justify-center p-4">
+    <div class="text-center max-w-2xl">
+        <div class="mb-8">
+            <svg class="mx-auto h-32 w-32 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+        </div>
+        <h1 class="text-6xl font-bold text-gray-800 mb-4">500</h1>
+        <h2 class="text-2xl font-semibold text-gray-700 mb-4">Error del servidor</h2>
+        <p class="text-gray-600 mb-8">Ha ocurrido un error interno. Por favor, intente nuevamente más tarde.</p>
+        <div class="space-x-4">
+            <a href="javascript:history.back()" 
+               class="inline-block bg-gray-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-700 transition duration-200">
+                Volver
+            </a>
+            <!-- Spring Boot resuelve th:href sin necesidad de contextPath manual -->
+                   <a th:href="@{/dashboard}" 
+               class="inline-block bg-red-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-red-700 transition duration-200">
+                Ir al inicio
+            </a>
+        </div>
+    </div>
+</body>
+</html>
