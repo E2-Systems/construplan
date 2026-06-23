@@ -54,7 +54,7 @@ out/
 Thumbs.db
 
 # === Archivos de conexión a la BD (credenciales sensibles) ===
-src/main/resources/application.properties
+#src/main/resources/application.properties
 src/main/resources/application.yml
 
 
