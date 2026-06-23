@@ -301,8 +301,9 @@ public class PlanillaService {
 
         for (AjustePlanilla adjustment : payroll.getAjustes()) {
             if (adjustment.getTipo() == TipoAjuste.ADELANTO) {
-                // Adelantos suman al pago final de la planilla de forma extraordinaria
+            	   // Se suma el adelanto porque es un cobro anticipado de un pago futuro que se le entrega en esta planilla.
                 finalTotal = finalTotal.add(adjustment.getMonto());
+           
             } else if (adjustment.getTipo() == TipoAjuste.DESCUENTO) {
                 // Descuentos extraordinarios restan al pago final de la planilla
                 finalTotal = finalTotal.subtract(adjustment.getMonto());

@@ -131,18 +131,27 @@
                     </div>
 
                     <!-- Detalle del neto -->
-                    <div class="border-t border-white/15 pt-4 space-y-2">
+					<div class="border-t border-white/15 pt-4 space-y-2"
+					                         th:with="
+					                            adelantosList=${planilla.ajustes.?[tipo.name() == 'ADELANTO']},
+					                            descuentosList=${planilla.ajustes.?[tipo.name() == 'DESCUENTO']}">
+					                        
+					                        
                         <div class="flex justify-between text-xs">
                             <span class="text-blue-100">Subtotal (Horas):</span>
-                            <span th:text="'S/ ' + ${#numbers.formatDecimal(planilla.totalPago, 1, 'COMMA', 2, 'POINT')}">S/ 1,200.00</span>
-                        </div>
-                        <div class="flex justify-between text-xs text-red-200" th:if="${not #lists.isEmpty(planilla.ajustes)}">
-                            <span>Ajustes (-)</span>
-                            <span>
-                                <th:block th:with="sumaAjustes=${#aggregates.sum(planilla.ajustes.![monto])}">
-                                    <span th:text="'-S/ ' + ${#numbers.formatDecimal(sumaAjustes, 1, 'COMMA', 2, 'POINT')}"></span>
-                                </th:block>
-                            </span>
+							<span th:text="'S/ ' + ${#numbers.formatDecimal(planilla.subtotalPago, 1, 'COMMA', 2, 'POINT')}">S/ 1,200.00</span>
+							                      </div>
+							                      
+							                      <!-- Adelantos (Suman) -->
+							                      <div class="flex justify-between text-xs text-green-200" th:if="${not #lists.isEmpty(adelantosList)}">
+							                          <span>Adelantos (+)</span>
+							                          <span th:text="'+S/ ' + ${#numbers.formatDecimal(#aggregates.sum(adelantosList.![monto]), 1, 'COMMA', 2, 'POINT')}"></span>
+							                        </div>
+													<!-- Descuentos (Restan) -->
+													                     <div class="flex justify-between text-xs text-red-200" th:if="${not #lists.isEmpty(descuentosList)}">
+													                         <span>Descuentos (-)</span>
+													                         <span th:text="'-S/ ' + ${#numbers.formatDecimal(#aggregates.sum(descuentosList.![monto]), 1, 'COMMA', 2, 'POINT')}"></span>
+													                    
                         </div>
                         <div class="flex justify-between items-end border-t border-white/20 pt-3 mt-2">
                             <span class="text-sm font-bold text-white">Neto a Recibir:</span>
@@ -224,9 +233,12 @@
                                 <td class="px-6 py-3.5 text-sm text-gray-600 font-medium" th:text="${ajuste.motivo}">
                                     Préstamo extraordinaria
                                 </td>
-                                <td class="px-6 py-3.5 whitespace-nowrap text-right text-sm font-bold text-gray-900" 
-                                    th:text="'S/ ' + ${#numbers.formatDecimal(ajuste.monto, 1, 'COMMA', 2, 'POINT')}">
-                                    -S/ 100.00
+								<td class="px-6 py-3.5 whitespace-nowrap text-right text-sm font-bold">
+								                                   <span th:if="${ajuste.tipo.name() == 'ADELANTO'}" class="text-emerald-600"
+								                                         th:text="'+S/ ' + ${#numbers.formatDecimal(ajuste.monto, 1, 'COMMA', 2, 'POINT')}"></span>
+								                                   <span th:if="${ajuste.tipo.name() == 'DESCUENTO'}" class="text-rose-600"
+								                                         th:text="'-S/ ' + ${#numbers.formatDecimal(ajuste.monto, 1, 'COMMA', 2, 'POINT')}"></span>
+								                              
                                 </td>
                                 <td class="px-6 py-3.5 whitespace-nowrap text-center" th:if="${planilla.estado.name() == 'GENERADA'}">
                                     <form th:action="@{/oficina/ajustes/{id}/eliminar(id=${ajuste.idAjuste})}" method="post"
