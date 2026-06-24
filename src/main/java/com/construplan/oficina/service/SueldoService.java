@@ -139,4 +139,8 @@ public class SueldoService {
         }
         return idEmpleado;
     }
+    public List<Sueldo> listarTodos() {
+        return sueldoRepository.findAll();
+    }
+
 }
