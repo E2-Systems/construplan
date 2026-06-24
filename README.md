@@ -1,7 +1,7 @@
 # ConstruPlan - Sistema de Gestión de Planillas y Tareo en Construcción Civil
 
 Este documento sirve como la guía técnica definitiva del proyecto **ConstruPlan**. .
-
+Hola hice un cambio aqui
 ---
 
 ## 1. Propósito de Negocio (El "Porqué" del Proyecto)
