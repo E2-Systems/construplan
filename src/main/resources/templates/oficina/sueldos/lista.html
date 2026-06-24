@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Sueldos - ConstruPlan</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#004E89',
+                        secondary: '#FF6B35',
+                        accent: '#FFD23F',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-gray-50 flex flex-col min-h-screen">
+
+    <!-- Navbar -->
+    <div th:replace="~{fragments/navbar :: navbar('sueldos')}"></div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 w-full flex-grow">
+
+        <!-- Encabezado -->
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900">Gestión de Sueldos</h1>
+                <p class="text-sm text-gray-600 mt-1">
+                    Lista de sueldos registrados en el sistema.
+                </p>
+            </div>
+        </div>
+
+        <!-- Tabla -->
+        <div class="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
+
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+
+                    <!-- HEADER -->
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase">Empleado</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase">Sueldo</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase">Periodo</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase">Inicio</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase">Fin</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase">Estado</th>
+                        </tr>
+                    </thead>
+
+                    <!-- BODY -->
+                    <tbody class="bg-white divide-y divide-gray-100">
+
+                        <tr th:each="sueldo : ${sueldos}" class="hover:bg-gray-50 transition">
+
+                            <!-- Empleado -->
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-semibold text-gray-900"
+                                     th:text="${sueldo.empleado.nombreCompleto}">
+                                    Juan Pérez
+                                </div>
+                                <div class="text-xs text-gray-500"
+                                     th:text="${sueldo.empleado.dni}">
+                                    12345678
+                                </div>
+                            </td>
+
+                            <!-- Sueldo -->
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">
+                                <span th:text="'S/ ' + ${sueldo.sueldo}">
+                                    S/ 100.00
+                                </span>
+                            </td>
+
+                            <!-- Periodo -->
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700"
+                                th:text="${sueldo.periodo}">
+                                MENSUAL
+                            </td>
+
+                            <!-- Inicio -->
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700"
+                                th:text="${sueldo.fechaInicio}">
+                                2026-01-01
+                            </td>
+
+                            <!-- Fin -->
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                                <span th:if="${sueldo.fechaFin != null}"
+                                      th:text="${sueldo.fechaFin}">
+                                    2026-01-31
+                                </span>
+
+                                <span th:if="${sueldo.fechaFin == null}" class="text-gray-400 italic">
+                                    Sin fecha fin
+                                </span>
+                            </td>
+
+                            <!-- Estado -->
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span th:if="${sueldo.fechaFin == null}"
+                                      class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                                    Activo
+                                </span>
+
+                                <span th:unless="${sueldo.fechaFin == null}"
+                                      class="px-2 py-1 text-xs font-semibold rounded-full bg-gray-200 text-gray-700">
+                                    Finalizado
+                                </span>
+                            </td>
+
+                        </tr>
+
+                        <!-- VACÍO -->
+                        <tr th:if="${#lists.isEmpty(sueldos)}">
+                            <td colspan="6" class="px-6 py-10 text-center text-sm text-gray-500">
+                                No hay sueldos registrados.
+                            </td>
+                        </tr>
+
+                    </tbody>
+
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div th:replace="~{fragments/footer :: footer}"></div>
+
+</body>
+
+</html>

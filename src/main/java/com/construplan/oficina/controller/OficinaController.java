@@ -177,4 +177,14 @@ public class OficinaController {
             return "redirect:/oficina/empleados";
         }
     }
+    
+    @GetMapping("/sueldos")
+    public String listarSueldos(Model model) {
+
+        List<Sueldo> sueldos = sueldoService.listarTodos();
+
+        model.addAttribute("sueldos", sueldos);
+
+        return "oficina/sueldos/lista";
+    }
 }
