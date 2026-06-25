@@ -3,6 +3,7 @@ package com.construplan.empleado.controller;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.construplan.campo.model.entity.AsignacionTarea;
 import com.construplan.campo.repository.AsignacionTareaRepository;
 import com.construplan.empleado.model.entity.Empleado;
+import com.construplan.empleado.model.entity.RegistroDiario;
 import com.construplan.empleado.service.EmpleadoService;
 import com.construplan.empleado.service.RegistroDiarioService;
 import com.construplan.empleado.service.TicketService;
@@ -66,39 +68,18 @@ public class EmpleadoController {
         // Datos del dashboard
         double horasSemanales  = registroDiarioService.obtenerTotalHorasSemanales(idEmpleado);
         double horasExtras     = registroDiarioService.obtenerTotalHorasExtrasSemanales(idEmpleado);
-        String estadoAsistencia = "SIN_ENTRADA";
-        int idRegistroActivo   = -1;
-
-        var activo = registroDiarioService.obtenerRegistroActivoHoy(idEmpleado, hoy);
-        if (activo != null) {
-            estadoAsistencia = "EN_TURNO";
-            idRegistroActivo = activo.getIdRegistro();
-        } else if (registroDiarioService.tieneRegistroHoy(idEmpleado, hoy)) {
-           estadoAsistencia = "JORNADA_COMPLETA";
-        }
         
-     // Determinar si puede reportar su tarea como completada (tiene tarea hoy y aún no tiene hora de fin/completada)
-        boolean puedeCompletarTarea = false;
-        AsignacionTarea asignacionPendiente = null;
-        var asignacionesHoy = asignacionTareaRepository.findByEmpleadoAndFechaRange(idEmpleado, hoy, hoy);
-        if (!asignacionesHoy.isEmpty()) {
-        	   AsignacionTarea asignacion = asignacionesHoy.get(0);
-            puedeCompletarTarea = (asignacion.getHoraMetaCompletada() == null);
-            if (puedeCompletarTarea) {
-                asignacionPendiente = asignacion;
-            }
-        }
+        List<RegistroDiario> todosRegistros = registroDiarioService.obtenerUltimosRegistros(idEmpleado);
+        List<RegistroDiario> ultimos3 = todosRegistros.stream()
+                .limit(3)
+                .collect(java.util.stream.Collectors.toList());
 
         model.addAttribute("empleado",         empleado);
         model.addAttribute("fechaActual",       hoy.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
         model.addAttribute("horasSemanales",    horasSemanales);
         model.addAttribute("horasExtras",       horasExtras);
         model.addAttribute("ticketsAbiertos", ticketService.getOpenTicketCountByEmployee(idEmpleado));
-        model.addAttribute("estadoAsistencia",  estadoAsistencia);
-        model.addAttribute("idRegistroActivo",  idRegistroActivo);
-        model.addAttribute("puedeCompletarTarea", puedeCompletarTarea);
-        model.addAttribute("asignacionPendiente", asignacionPendiente);
-        model.addAttribute("ultimosRegistros",  registroDiarioService.obtenerUltimosRegistros(idEmpleado));
+        model.addAttribute("ultimosRegistros", ultimos3);
         return "empleado/dashboard";
     }
 
@@ -186,12 +167,62 @@ public class EmpleadoController {
             return null;
         }
     }
+    /**
+     * Permite al empleado visualizar la asignación de su jornada del día de hoy
+     * y registrar su asistencia diaria (reloj marcador de entrada, meta y salida).
+     */
+    @GetMapping("/jornada")
+    public String viewJornada(Authentication authentication, Model model) {
+        String username = authentication.getName();
+        Optional<Empleado> optionalEmpleado = empleadoService.buscarOptionalPorUsername(username);
+        if (optionalEmpleado.isEmpty()) {
+            return "redirect:/empleado/perfil";
+        }
+        Empleado empleado = optionalEmpleado.get();
+        int idEmpleado = empleado.getIdEmpleado();
+        LocalDate hoy = LocalDate.now();
+
+        // Evaluar el estado de la asistencia del día de hoy
+        String estadoAsistencia = "SIN_ENTRADA";
+        int idRegistroActivo = -1;
+
+        var activo = registroDiarioService.obtenerRegistroActivoHoy(idEmpleado, hoy);
+        if (activo != null) {
+            estadoAsistencia = "EN_TURNO";
+            idRegistroActivo = activo.getIdRegistro();
+        } else if (registroDiarioService.tieneRegistroHoy(idEmpleado, hoy)) {
+            estadoAsistencia = "JORNADA_COMPLETA";
+        }
+
+        // Determinar si puede reportar su tarea como completada y obtener la asignación pendiente
+        boolean puedeCompletarTarea = false;
+        AsignacionTarea asignacionPendiente = null;
+        var asignacionesHoy = asignacionTareaRepository.findByEmpleadoAndFechaRange(idEmpleado, hoy, hoy);
+        
+        if (!asignacionesHoy.isEmpty()) {
+            AsignacionTarea asignacion = asignacionesHoy.get(0);
+            puedeCompletarTarea = (asignacion.getHoraMetaCompletada() == null);
+            if (puedeCompletarTarea) {
+                asignacionPendiente = asignacion;
+            }
+        }
+
+        model.addAttribute("empleado", empleado);
+        model.addAttribute("active", "jornada");
+        model.addAttribute("fechaActual", hoy.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+        model.addAttribute("estadoAsistencia", estadoAsistencia);
+        model.addAttribute("idRegistroActivo", idRegistroActivo);
+        model.addAttribute("puedeCompletarTarea", puedeCompletarTarea);
+        model.addAttribute("asignacionPendiente", asignacionPendiente);
+
+        return "empleado/jornada";
+    }
     
     /**
      * Muestra el historial completo de asistencia del empleado logueado.
-     * Soporta los alias de ruta '/registro-horas', '/horas' y '/jornada'.
+       * Soporta los alias de ruta '/registro-horas' y '/horas'.
      */
-    @GetMapping({"/registro-horas", "/horas", "/jornada"})
+    @GetMapping({"/registro-horas", "/horas"})
     public String viewRecords(Authentication authentication, Model model) {
         String username = authentication.getName();
         Optional<Empleado> optionalEmpleado = empleadoService.buscarOptionalPorUsername(username);
