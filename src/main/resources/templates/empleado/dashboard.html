@@ -35,102 +35,7 @@
                 <span id="reloj-header"></span>
             </p>
         </div>
-		<!-- Alerta de Tarea Asignada para Hoy -->
-		     <div class="px-4 mb-6" th:if="${asignacionPendiente != null}">
-		         <div class="bg-blue-50 border-l-4 border-primary p-5 rounded-lg shadow-sm">
-		             <div class="flex items-start">
-		                 <div class="flex-shrink-0">
-		                     <svg class="h-6 w-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-		                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-		                               d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-		                     </svg>
-		                 </div>
-		                 <div class="ml-3 flex-grow">
-		                     <h3 class="text-sm font-bold text-primary">Tarea Asignada Pendiente</h3>
-		                     <div class="mt-2 text-sm text-gray-700">
-		                         <p class="mb-1">Tienes una actividad asignada para realizar hoy en obra:</p>
-		                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-3 p-3 bg-white rounded-md border border-blue-100">
-		                             <div>
-		                                 <span class="block text-xs font-semibold text-gray-400 uppercase">Actividad</span>
-		                                 <span class="text-sm font-bold text-gray-900" th:text="${asignacionPendiente.meta.tarea.nombre}">Instalación de tuberías</span>
-		                             </div>
-		                             <div>
-		                                 <span class="block text-xs font-semibold text-gray-400 uppercase">Meta a Cumplir</span>
-		                                 <span class="text-sm font-bold text-gray-900" 
-		                                       th:text="${#numbers.formatDecimal(asignacionPendiente.meta.cantidad, 1, 0)} + ' ' + ${asignacionPendiente.meta.tarea.unidadMedida}">50 metros</span>
-		                             </div>
-		                             <div>
-		                                 <span class="block text-xs font-semibold text-gray-400 uppercase">Proyecto / Obra</span>
-		                                 <span class="text-sm font-bold text-gray-900" th:text="${asignacionPendiente.proyecto.nombre}">Obra Las Acacias</span>
-		                             </div>
-		                             <div>
-		                                 <span class="block text-xs font-semibold text-gray-400 uppercase">Asignado Por</span>
-		                                 <span class="text-sm font-bold text-gray-900" th:text="${asignacionPendiente.asignador.username}">supervisor1</span>
-		                             </div>
-		                         </div>
-		                     </div>
-		                 </div>
-		             </div>
-		         </div>
-		     </div>
-        <!-- Registro Rápido de Asistencia -->
-        <div class="px-4 mb-8">
-            <div class="bg-gradient-to-r from-primary to-blue-800 rounded-lg shadow-xl p-6 text-white">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <h2 class="text-2xl font-bold mb-4">Registro de Asistencia</h2>
-                        <p class="text-blue-100 mb-6">Registra tu entrada o salida del trabajo</p>
-                        <div class="text-5xl font-bold mb-2" id="reloj">--:--</div>
-                        <p class="text-blue-100">Hora actual</p>
-
-                        <!-- Estado -->
-                        <div class="mt-4 px-4 py-2 bg-blue-900 bg-opacity-50 rounded-lg">
-                            <p class="text-sm font-semibold">Estado actual:</p>
-                            <p class="text-lg">
-                                <span th:if="${estadoAsistencia == 'SIN_ENTRADA'}">⏸️ Sin registrar</span>
-                                <span th:if="${estadoAsistencia == 'EN_TURNO'}">✅ En turno</span>
-                                <span th:if="${estadoAsistencia == 'JORNADA_COMPLETA'}">✔️ Jornada completa</span>
-                            </p>
-                        </div>
-                    </div>
-
-                    <div class="flex flex-col justify-center space-y-4">
-                        <!-- Botón Entrada -->
-                        <button onclick="registrarEntrada()"
-                                th:disabled="${estadoAsistencia != 'SIN_ENTRADA'}"
-                                th:classappend="${estadoAsistencia != 'SIN_ENTRADA'} ? 'opacity-50 cursor-not-allowed' : ''"
-                                class="btn-registro w-full bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-6 rounded-lg transition duration-200 flex items-center justify-center">
-                            <svg class="h-6 w-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
-                            </svg>
-                            Registrar Entrada
-                        </button>
-
-                        <!-- Botón Completar Tarea — solo si puedeCompletarTarea -->
-                        <button th:if="${puedeCompletarTarea}"
-                                onclick="completarTarea()"
-                                class="btn-registro w-full bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-4 px-6 rounded-lg transition duration-200 flex items-center justify-center">
-                            <svg class="h-6 w-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                            </svg>
-                            Tarea Completada
-                        </button>
-
-                        <!-- Botón Salida -->
-                        <button onclick="registrarSalida()"
-                                th:disabled="${estadoAsistencia != 'EN_TURNO'}"
-                                th:classappend="${estadoAsistencia != 'EN_TURNO'} ? 'opacity-50 cursor-not-allowed' : ''"
-                                class="btn-registro w-full bg-red-500 hover:bg-red-600 text-white font-bold py-4 px-6 rounded-lg transition duration-200 flex items-center justify-center">
-                            <svg class="h-6 w-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-                            </svg>
-                            Registrar Salida
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
+	
 		<!-- Stats Cards -->
 		        <div class="px-4 mb-8">
 		            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -311,7 +216,7 @@
 		        function actualizarReloj() {
 		            const ahora = new Date();
 		            const hora = String(ahora.getHours()).padStart(2, '0') + ':' + String(ahora.getMinutes()).padStart(2, '0');
-		            document.getElementById('reloj').textContent = hora;
+		          
 		            const h = document.getElementById('reloj-header');
 		            if (h) h.textContent = hora;
 		        }
@@ -319,82 +224,15 @@
 		        setInterval(actualizarReloj, 1000);
 
 		        // ── CSRF para fetch ───────────────────────────────────────────────────
-		        const csrfToken  = /*[[${_csrf.token}]]*/ '';
-		        const csrfHeader = /*[[${_csrf.headerName}]]*/ '';
+		   
 
 		        // ── Registro de asistencia ────────────────────────────────────────────
-		        function registrarEntrada() {
-		            if (!confirm('¿Confirmar registro de entrada?')) return;
-		            enviarRegistro('entrada', 'Entrada registrada', 'green');
-		        }
-
-		        function registrarSalida() {
-		            if (!confirm('¿Confirmar registro de salida?')) return;
-		            enviarRegistro('salida', 'Salida registrada', 'red');
-		        }
-
-		        function completarTarea() {
-		            if (!confirm('¿Confirmar que completaste la tarea?')) return;
-		            enviarRegistro('completar-tarea', 'Tarea completada', 'yellow');
-		        }
-
-		        function enviarRegistro(accion, mensajeExito, color) {
-		            deshabilitarBotones(true);
-
-		            fetch('/empleado/registro-asistencia', {
-		                method: 'POST',
-		                headers: {
-		                    'Content-Type': 'application/x-www-form-urlencoded',
-		                    [csrfHeader]: csrfToken   // Spring Security requiere el header CSRF en fetch
-		                },
-		                body: 'accion=' + accion
-		            })
-		            .then(r => r.json())
-		            .then(data => {
-		                if (data.success) {
-		                    mostrarNotificacion(mensajeExito + ' a las ' + data.hora, 'success', color);
-		                    setTimeout(() => window.location.reload(), 1500);
-		                } else {
-		                    mostrarNotificacion(data.message, 'error', 'red');
-		                    deshabilitarBotones(false);
-		                }
-		            })
-		            .catch(() => {
-		                mostrarNotificacion('Error al conectar con el servidor', 'error', 'red');
-		                deshabilitarBotones(false);
-		            });
-		        }
+	
 
 		        // ── Notificaciones ────────────────────────────────────────────────────
-		        function mostrarNotificacion(mensaje, tipo, color) {
-		            const n = document.createElement('div');
-		            n.className = 'fixed top-4 right-4 px-6 py-4 rounded-lg shadow-lg text-white z-50 transform transition-all duration-500 translate-x-96';
-		            n.style.backgroundColor = color === 'green' ? '#10b981' : color === 'red' ? '#ef4444' : '#f59e0b';
-		            n.innerHTML = `
-		                <div class="flex items-center">
-		                    <svg class="h-6 w-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-		                        ${tipo === 'success'
-		                            ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>'
-		                            : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>'}
-		                    </svg>
-		                    <span class="font-semibold">${mensaje}</span>
-		                </div>`;
-		            document.body.appendChild(n);
-		            setTimeout(() => n.style.transform = 'translateX(0)', 100);
-		            setTimeout(() => {
-		                n.style.transform = 'translateX(400px)';
-		                setTimeout(() => document.body.removeChild(n), 500);
-		            }, 3000);
-		        }
-
+		       
 		        // ── Deshabilitar botones ──────────────────────────────────────────────
-		        function deshabilitarBotones(deshabilitar) {
-		            document.querySelectorAll('.btn-registro').forEach(btn => {
-		                btn.disabled = deshabilitar;
-		                btn.classList.toggle('opacity-50', deshabilitar);
-		                btn.classList.toggle('cursor-not-allowed', deshabilitar);
-		            });
-		        }
+		 
 		    </script>
 		</body>
 		</html>
