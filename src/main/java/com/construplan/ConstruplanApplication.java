@@ -10,13 +10,11 @@ import jakarta.annotation.PostConstruct;
 @SpringBootApplication
 public class ConstruplanApplication {
 
-	@PostConstruct
-	public void initializeTimeZone() {
-		TimeZone.setDefault(TimeZone.getTimeZone("America/Lima"));
-	}
-
-	
 	public static void main(String[] args) {
+		// Establecemos la zona horaria de forma global antes de iniciar el contexto de Spring.
+		// Esto asegura que Hibernate y la conexión JDBC utilicen la zona horaria correcta desde el arranque.
+		TimeZone.setDefault(TimeZone.getTimeZone("America/Lima"));
+	
 		SpringApplication.run(ConstruplanApplication.class, args);
 	}
 
