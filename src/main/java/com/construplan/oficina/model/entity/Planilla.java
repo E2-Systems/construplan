@@ -77,4 +77,14 @@ public class Planilla {
     @OneToMany(mappedBy = "planilla", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Builder.Default
     private List<AjustePlanilla> ajustes = new ArrayList<>();
+    
+    // Se calcula la suma acumulada de los pagos diarios para mantener el subtotal por horas intacto ante cualquier ajuste posterior.
+    public BigDecimal getSubtotalPago() {
+        if (detalles == null) {
+            return BigDecimal.ZERO;
+        }
+        return detalles.stream()
+                .map(PlanillaDetalle::getPagoDia)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
 }

@@ -301,8 +301,9 @@ public class PlanillaService {
 
         for (AjustePlanilla adjustment : payroll.getAjustes()) {
             if (adjustment.getTipo() == TipoAjuste.ADELANTO) {
-                // Adelantos suman al pago final de la planilla de forma extraordinaria
+            	   // Se suma el adelanto porque es un cobro anticipado de un pago futuro que se le entrega en esta planilla.
                 finalTotal = finalTotal.add(adjustment.getMonto());
+           
             } else if (adjustment.getTipo() == TipoAjuste.DESCUENTO) {
                 // Descuentos extraordinarios restan al pago final de la planilla
                 finalTotal = finalTotal.subtract(adjustment.getMonto());
@@ -350,6 +351,34 @@ public class PlanillaService {
         }
 
         planillaRepository.delete(payroll);
+    }
+    /**
+     * Regenera una planilla de forma individual.
+     * Elimina la planilla actual si se encuentra en estado GENERADA y procede a realizar el
+     * cálculo de la planilla con las asistencias vigentes.
+     * La anotación @Transactional garantiza la consistencia: si falla la generación (por ejemplo,
+     * si no quedan asistencias aprobadas en esa semana), se hace rollback del borrado.
+     */
+    @Transactional
+    public Planilla regenerateWeeklyPayroll(int idPlanilla) {
+        Planilla payroll = planillaRepository.findById(idPlanilla)
+                .orElseThrow(() -> new IllegalArgumentException("Planilla no encontrada con ID: " + idPlanilla));
+
+        // Guard temprano: no permitimos alterar el estado administrativo si ya fue pagada.
+        if (payroll.getEstado() == EstadoPlanilla.PAGADA) {
+            throw new IllegalStateException("No se puede regenerar una planilla que ya ha sido marcada como PAGADA.");
+        }
+
+        int employeeId = payroll.getEmpleado().getIdEmpleado();
+        LocalDate startDate = payroll.getFechaInicio();
+
+        // Eliminamos la planilla para que no bloquee la comprobación de duplicados al generar la nueva.
+        planillaRepository.delete(payroll);
+        // Forzamos la escritura en la base de datos para liberar la restricción única del periodo.
+        planillaRepository.flush();
+
+        // Volvemos a calcular la planilla desde cero con los datos aprobados actuales.
+        return generateWeeklyPayroll(employeeId, startDate);
     }
     /**
      * Obtiene las planillas generadas en una semana específica ordenadas por apellido del empleado.

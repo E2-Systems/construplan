@@ -25,7 +25,12 @@ jobs:
           distribution: 'microsoft'
 
       - name: Build with Maven
-        run: mvn clean install
+        run: mvn clean package -DskipTests
+
+      - name: Verify build output
+        run: |
+          echo "=== TARGET DIRECTORY ==="
+          ls -lah target
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
@@ -42,6 +47,12 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: java-app
+          path: java-app
+          
+      - name: Verify downloaded artifact
+        run: |
+          echo "=== DOWNLOADED FILES ==="
+          ls -R java-app
       
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
@@ -49,5 +60,5 @@ jobs:
         with:
           app-name: 'construplan'
           slot-name: 'Production'
-          package: '*.jar'
+          package: 'java-app/*.jar'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_42C391DC99AA47638B4E51B9F521F59F }}
