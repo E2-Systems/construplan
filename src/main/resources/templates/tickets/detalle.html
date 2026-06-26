@@ -182,7 +182,19 @@
                     <!-- Estado: EN_REVISION y es CAMPO -->                    
 						<div class="p-6 space-y-4" th:if="${ticket.estado.enRevision and isCampo}">
 						 <form th:action="@{/tickets/{id}/resolver(id=${ticket.idTicket})}" method="post" class="space-y-4">
-                            <div>
+							<div class="grid grid-cols-2 gap-4">
+							                               <div>
+							                                   <label for="horasBase" class="block text-xs font-bold text-gray-700 uppercase mb-2">Horas Base</label>
+							                                   <input type="number" step="0.01" id="horasBase" name="horasBase" th:value="${ticket.registroDiario.horasBase}" required
+							                                          class="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm font-semibold text-gray-700" />
+							                               </div>
+							                               <div>
+							                                   <label for="horasExtra" class="block text-xs font-bold text-gray-700 uppercase mb-2">Horas Extra</label>
+							                                   <input type="number" step="0.01" id="horasExtra" name="horasExtra" th:value="${ticket.registroDiario.horasExtra}" required
+							                                          class="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm font-semibold text-gray-700" />
+							                               </div>
+							                           </div>
+							 <div>
                                 <label for="respuesta" class="block text-xs font-bold text-gray-700 uppercase mb-2">Respuesta / Resolución</label>
                                 <textarea id="respuesta" name="respuesta" rows="5" required
                                           placeholder="Escriba la justificación o solución de la discrepancia (por ejemplo: 'Se revisó la bitácora física y se corrigió la asistencia en planilla...')"
