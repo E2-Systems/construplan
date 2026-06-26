@@ -143,21 +143,6 @@ public class PlanillaController {
         }
         return "redirect:/oficina/planillas";
     }
-
-    /**
-     * Regenera una planilla de forma individual y actualiza sus valores.
-     */
-    @PostMapping("/detalle/{id}/regenerar")
-    public String regeneratePayroll(@PathVariable("id") int idPlanilla, RedirectAttributes redirectAttributes) {
-        try {
-            Planilla newPayroll = planillaService.regenerateWeeklyPayroll(idPlanilla);
-            redirectAttributes.addFlashAttribute("mensaje", "La planilla ha sido regenerada y recalculada con éxito.");
-            return "redirect:/oficina/planillas/detalle/" + newPayroll.getIdPlanilla();
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Error al intentar regenerar la planilla: " + e.getMessage());
-            return "redirect:/oficina/planillas/detalle/" + idPlanilla;
-        }
-    }
     /**
      * Muestra el resumen general de pagos de la semana seleccionada,
      * agregando las métricas de todas las planillas individuales generadas en ese rango.

@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.construplan.empleado.model.entity.EstadoRegistro;
 import com.construplan.empleado.model.entity.EstadoTicket;
 import com.construplan.empleado.model.entity.RegistroDiario;
 import com.construplan.empleado.model.entity.Ticket;
@@ -106,12 +105,10 @@ public class TicketService {
 
     /**
      * Resuelve definitivamente el ticket asignándole una respuesta de justificación y
-       * pasando su estado a RESUELTO. Además, actualiza las horas de asistencia vinculada
-     * y cambia su estado de OBSERVADO a APROBADO.
-     * La respuesta es obligatoria para garantizar el sustento.
+     * pasando su estado a RESUELTO. La respuesta es obligatoria para garantizar el sustento.
      */
     @Transactional
-    public Ticket resolveTicket(int idTicket, String respuesta, BigDecimal horasBase, BigDecimal horasExtra) {
+    public Ticket resolveTicket(int idTicket, String respuesta) {
         if (respuesta == null || respuesta.trim().isEmpty()) {
             throw new IllegalArgumentException("La respuesta de resolución es obligatoria.");
         }
@@ -120,12 +117,6 @@ public class TicketService {
         if (ticket.getEstado() == EstadoTicket.RESUELTO) {
             throw new IllegalStateException("El ticket ya se encuentra RESUELTO.");
         }
-        // Actualizamos la asistencia diaria vinculada con las nuevas horas corregidas y aprobamos
-        RegistroDiario registro = ticket.getRegistroDiario();
-        registro.setHorasBase(horasBase);
-        registro.setHorasExtra(horasExtra);
-        registro.setEstado(EstadoRegistro.APROBADO);
-        registroDiarioRepository.save(registro);
 
         ticket.setRespuesta(respuesta);
         ticket.setEstado(EstadoTicket.RESUELTO);

@@ -164,24 +164,11 @@
                             </td>
 
                             <!-- Acciones -->
-                              <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium flex items-center justify-center gap-2">
+                            <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
                                 <a th:href="@{/oficina/planillas/detalle/{id}(id=${plan.idPlanilla})}"
-                                    class="text-primary hover:text-white border border-primary hover:bg-primary px-3.5 py-1.5 rounded-lg transition duration-150 shadow-sm font-semibold text-xs">
+                                   class="text-primary hover:text-white border border-primary hover:bg-primary px-3.5 py-1.5 rounded-lg transition duration-150 shadow-sm font-semibold">
                                     Ver Detalle
                                 </a>
-								<form th:if="${plan.estado.name() == 'GENERADA'}" 
-								                                     th:action="@{/oficina/planillas/detalle/{id}/eliminar(id=${plan.idPlanilla})}" 
-								                                     method="post" 
-								                                     class="inline"
-								                                     onsubmit="return confirm('¿Está seguro de que desea eliminar esta planilla de forma definitiva? Se borrarán todos los detalles de horas y ajustes asociados.');">
-								                                   <button type="submit" 
-								                                           class="text-red-600 hover:text-white border border-red-200 hover:bg-red-600 px-3.5 py-1.5 rounded-lg transition duration-150 shadow-sm font-semibold text-xs flex items-center gap-1">
-								                                       <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-								                                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-								                                       </svg>
-								                                       Eliminar
-								                                   </button>
-								                               </form>
                             </td>
                         </tr>
                         <tr th:if="${#lists.isEmpty(planillas)}">

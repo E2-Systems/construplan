@@ -63,16 +63,6 @@
                         Marcar como Pagada
                     </button>
                 </form>
-				<form th:action="@{/oficina/planillas/detalle/{id}/regenerar(id=${planilla.idPlanilla})}" method="post" 
-				                      onsubmit="return confirm('¿Está seguro de que desea regenerar y volver a calcular esta planilla con las asistencias vigentes? Se perderán los ajustes agregados manualmente.');">
-				                    <button type="submit" 
-				                            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition text-sm font-semibold shadow flex items-center gap-1.5">
-				                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-				                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 7.89H18v3" />
-				                        </svg>
-				                        Regenerar Planilla
-				                    </button>
-				                </form>
 				<form th:action="@{/oficina/planillas/detalle/{id}/eliminar(id=${planilla.idPlanilla})}" method="post" 
 				                     onsubmit="return confirm('¿Está seguro de que desea eliminar esta planilla de forma definitiva? Se borrarán todos los detalles de horas y ajustes asociados.');">
 				                   <button type="submit" 
