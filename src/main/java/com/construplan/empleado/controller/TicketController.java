@@ -1,6 +1,7 @@
 package com.construplan.empleado.controller;
 
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -215,13 +216,16 @@ public class TicketController {
     }
 
     /**
-     * Resuelve la inconformidad aportando una justificación escrita obligatoria.
+       * Resuelve la inconformidad aportando una justificación escrita obligatoria
+     * y las horas modificadas/aprobadas para la asistencia.
      * Exclusivo para el Ingeniero de Campo.
      */
     @PostMapping("/tickets/{id}/resolver")
     public String resolve(Authentication authentication, 
                           @PathVariable("id") int id, 
                           @RequestParam("respuesta") String respuesta, 
+                          @RequestParam("horasBase") BigDecimal horasBase,
+                          @RequestParam("horasExtra") BigDecimal horasExtra,
                           RedirectAttributes redirectAttributes) {
         boolean isCampo = authentication.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_CAMPO"));
@@ -231,8 +235,8 @@ public class TicketController {
         }
 
         try {
-            ticketService.resolveTicket(id, respuesta);
-            redirectAttributes.addFlashAttribute("success", "Ticket resuelto correctamente.");
+            ticketService.resolveTicket(id, respuesta, horasBase, horasExtra);
+            redirectAttributes.addFlashAttribute("success", "Ticket resuelto correctamente y asistencia diaria vinculada aprobada.");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
         }
