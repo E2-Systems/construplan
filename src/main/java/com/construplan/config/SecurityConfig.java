@@ -29,7 +29,8 @@ public class SecurityConfig {
 	@Bean
 	// Para pruebas (texto plano, inseguro):
 	public PasswordEncoder passwordEncoder() {
-		return NoOpPasswordEncoder.getInstance();
+		//return NoOpPasswordEncoder.getInstance();
+		return new BCryptPasswordEncoder();
 	}
 	// Para producción (encriptado seguro):
 	// public BCryptPasswordEncoder passwordEncoder() {
